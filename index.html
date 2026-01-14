@@ -903,7 +903,7 @@ window.sendOrder = () => {
     `✅ _Espere su confirmación, gracias..._`
   );
 
-  window.open(`https://wa.me/53910527?text=${text}`, '_blank');
+  window.open(`https://wa.me/+5353910527?text=${text}`, '_blank');
   
   cart = [];
   document.querySelectorAll('#order-form input').forEach(i => { i.value = ''; i.classList.remove('invalid'); });
@@ -988,4 +988,5 @@ function fallbackCopy(text) {
 init();
 </script>
 </body>
+
 </html>
