@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin - Tienda</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    /* VARIABLES Y BASE (Mantenidos del original) */
+    :root {
+      --bg-dark: #0F172B;
+      --panel-dark: #1e293b;
+      --accent: #3b82f6;
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --text: #e2e8f0;
+      --text-muted: #94a3b8;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+    body { background-color: var(--bg-dark); color: var(--text); padding: 15px; max-width: 1000px; margin: 0 auto; line-height: 1.5; }
+
+    /* BOTONES PRINCIPALES */
+    .main-buttons {
+      display: flex;
+      gap: 15px;
+      margin: 30px 0;
+      flex-wrap: wrap;
+    }
+    .btn-main {
+      background: var(--panel-dark);
+      border: 2px solid #334155;
+      color: var(--text);
+      padding: 20px 30px;
+      border-radius: 12px;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 200px;
+    }
+    .btn-main:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+      background: #1e293b;
+    }
+
+    /* CONTENIDO ORIGINAL MANTENIDO */
+    .panel-section { background-color: var(--panel-dark); border-radius: 12px; padding: 20px; margin-bottom: 30px; border: 1px solid #334155; animation: fadeIn 0.3s ease; }
+    h2 { color: #93c5fd; margin-bottom: 20px; border-bottom: 1px solid #334155; padding-bottom: 10px; font-size: 1.4rem; }
+    .hidden { display: none !important; }
+
+    /* FORMULARIOS */
+    .form-row { 
+      display: flex; 
+      flex-wrap: wrap; 
+      gap: 15px; 
+      align-items: flex-end; 
+      margin-bottom: 25px; 
+      background: #0f172a; 
+      padding: 20px; 
+      border-radius: 12px; 
+      border: 1px solid #1e293b;
+    }
+
+    .form-field { 
+      flex: 1; 
+      min-width: 200px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .form-field label { 
+      font-size: 11px; 
+      color: var(--text-muted); 
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    input, select { 
+      width: 100%; 
+      padding: 12px; 
+      background: #1e293b; 
+      color: white; 
+      border: 1px solid #334155; 
+      border-radius: 8px; 
+      outline: none; 
+      transition: all 0.2s; 
+      font-size: 15px; 
+    }
+    input:focus { border-color: var(--accent); background: #263349; }
+
+    .image-input-group { display: flex; align-items: center; gap: 12px; }
+    .preview-container { width: 48px; height: 48px; min-width: 48px; border-radius: 8px; overflow: hidden; background: #0f172a; display: flex; align-items: center; justify-content: center; border: 1px solid #334155; }
+    .preview-container img { width: 100%; height: 100%; object-fit: cover; }
+
+    /* BOTONES */
+    .btn { padding: 12px 20px; border-radius: 8px; cursor: pointer; border: none; font-weight: bold; transition: 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-size: 14px; }
+    .btn:active { transform: scale(0.96); }
+    .btn-add { background: var(--accent); color: white; }
+    .btn-save { background: var(--success); color: white; }
+    .btn-delete { background: var(--danger); color: white; }
+    .btn-edit { background: var(--warning); color: white; }
+    .btn-secondary { background: #475569; color: white; }
+
+    /* LISTADO */
+    .list-item { background-color: #0F172B; border: 1px solid #334155; border-radius: 8px; padding: 15px; margin-bottom: 12px; display: flex; flex-direction: column; gap: 15px; }
+    .item-content { display: flex; align-items: center; gap: 15px; flex: 1; }
+    .list-actions { display: flex; gap: 8px; }
+
+    @media (min-width: 768px) {
+      .list-item { flex-direction: row; justify-content: space-between; }
+      .btn-add { width: auto; }
+    }
+
+    .item-inactive { opacity: 0.5; filter: grayscale(0.8); }
+    .status-badge { padding: 8px 10px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; border: none; min-width: 50px; text-align: center; }
+    .bg-on { background: #064e3b; color: #10b981; }
+    .bg-off { background: #450a0a; color: #ef4444; }
+
+    /* MODALES */
+    .modal-overlay { 
+      position: fixed; 
+      top: 0; 
+      left: 0; 
+      width: 100%; 
+      height: 100%; 
+      background: rgba(0,0,0,0.8); 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      z-index: 10000; 
+      opacity: 0; 
+      pointer-events: none; 
+      transition: 0.3s;
+      padding: 20px;
+    }
+    .modal-overlay.active { opacity: 1; pointer-events: all; }
+    .modal-content { 
+      background: var(--panel-dark); 
+      padding: 25px; 
+      border-radius: 12px; 
+      max-width: 900px; 
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      position: relative;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+      border-bottom: 1px solid #334155;
+      padding-bottom: 15px;
+    }
+
+    .close-modal {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 28px;
+      cursor: pointer;
+      padding: 5px 15px;
+      transition: color 0.2s;
+    }
+    .close-modal:hover {
+      color: var(--text);
+    }
+
+    /* COMPONENTES */
+    #toast-container { 
+       position: fixed; 
+       top: 20px; 
+       right: 20px; 
+       z-index: 99999;
+    }
+    .toast { background: #1e293b; color: white; padding: 12px 24px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid var(--accent); animation: slideIn 0.3s ease-out; }
+
+    @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  </style>
+</head>
+<body>
+
+  <h1 style="margin: 20px 0; font-size: 1.8rem;">Administrador de Tienda</h1>
+
+  <!-- BOTONES PRINCIPALES -->
+  <div class="main-buttons">
+    <button class="btn-main" onclick="openModal('modal-payments')">
+      💳 Monedas
+    </button>
+    <button class="btn-main" onclick="openModal('modal-store')">
+      🏪 Tienda
+    </button>
+    <button class="btn-main" onclick="openModal('modal-orders')">
+    📊 Reporte Pedidos
+    </button>
+  </div>
+
+  <!-- MODAL MÉTODOS DE PAGO -->
+  <div id="modal-payments" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>💳 Métodos de Pago y Tasas</h2>
+        <button class="close-modal" onclick="closeModal('modal-payments')">×</button>
+      </div>
+      
+      <div class="form-row">
+        <div class="form-field">
+          <label>Nombre (Ej: Transferencia)</label>
+          <input id="pay-name" placeholder="Nombre visible">
+        </div>
+        <div class="form-field" style="min-width: 120px;">
+          <label>Código (ID)</label>
+          <input id="pay-code" placeholder="ej: transfer">
+        </div>
+        <div class="form-field">
+          <label>Modo de Cálculo</label>
+          <select id="pay-mode">
+            <option value="none">Precio Base (Ninguno)</option>
+            <option value="percent">Porcentaje (+ %)</option>
+            <option value="divide">División (Tasa /)</option>
+          </select>
+        </div>
+        <div class="form-field" style="min-width: 100px;">
+          <label>Valor</label>
+          <input id="pay-value" type="number" step="0.01" value="0">
+        </div>
+        <button class="btn btn-add" onclick="handleAddPayment()">➕ Agregar</button>
+      </div>
+      <ul id="payments-list"></ul>
+    </div>
+  </div>
+
+  <!-- MODAL TIENDA (Categorías y Productos) -->
+  <div id="modal-store" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="store-title">🏪 Administrar Tienda</h2>
+        <button class="close-modal" onclick="closeModal('modal-store')">×</button>
+      </div>
+
+      <!-- SECCIÓN CATEGORÍAS (visible por defecto) -->
+      <div id="section-categories">
+        <div class="form-row">
+          <div class="form-field">
+            <label>Nombre Categoría</label>
+            <input id="new-cat-name" placeholder="Ej: Hamburguesas">
+          </div>
+          <div class="form-field">
+            <label>Imagen Portada</label>
+            <div class="image-input-group">
+              <div class="preview-container">
+                <img id="pre-cat-img" src="" class="hidden">
+              </div>
+              <input type="file" id="new-cat-img" accept="image/*">
+            </div>
+          </div>
+          <button class="btn btn-add" onclick="handleAddCategory()">➕ Crear Categoría</button>
+        </div>
+        <ul id="categories-list"></ul>
+      </div>
+
+      <!-- SECCIÓN PRODUCTOS (oculta inicialmente) -->
+      <div id="section-products" class="hidden">
+        <div style="margin-bottom: 20px;">
+          <button class="btn btn-secondary" onclick="showMainPanel()">
+            ⬅ Volver a Categorías
+          </button>
+        </div>
+        
+        <h3 id="current-cat-title" style="color: #93c5fd; margin-bottom: 20px;">🛍️ Productos</h3>
+        
+        <div class="form-row">
+          <div class="form-field">
+            <label>Nombre del Producto</label>
+            <input id="new-prod-name" placeholder="Ej: Doble Carne">
+          </div>
+          <div class="form-field" style="flex: 0.5; min-width: 120px;">
+            <label>Precio Base ($)</label>
+            <input id="new-prod-price" type="number" step="0.01" placeholder="0.00">
+          </div>
+          <div class="form-field">
+            <label>Imagen Producto</label>
+            <div class="image-input-group">
+              <div class="preview-container">
+                <img id="pre-prod-img" src="" class="hidden">
+              </div>
+              <input type="file" id="new-prod-img" accept="image/*">
+            </div>
+          </div>
+          <button class="btn btn-add" onclick="handleAddProduct()">➕ Agregar Producto</button>
+        </div>
+        <ul id="products-list"></ul>
+      </div>
+    </div>
+  </div>
+  
+  <!-- MODAL REPORTES DE PEDIDOS -->
+<div id="modal-orders" class="modal-overlay">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>📊 Resumen de Pedidos por Fecha</h2>
+      <button class="close-modal" onclick="closeModal('modal-orders')">×</button>
+    </div>
+    
+    <div style="margin-bottom: 15px; color: var(--text-muted);">
+      Total de ventas registradas: <span id="total-orders-count" style="color: var(--accent); font-weight: bold;">0</span>
+    </div>
+
+    <div id="orders-list-container">
+      <ul id="orders-summary-list">
+        <!-- Se llenará dinámicamente -->
+      </ul>
+    </div>
+  </div>
+</div>
+
+  <!-- COMPONENTES DINÁMICOS (mantenidos) -->
+  <div id="toast-container"></div>
+
+  <div id="modal-confirm" class="modal-overlay">
+    <div class="modal-content" style="max-width: 400px; text-align: center;">
+      <h3 id="modal-title" style="margin-bottom:10px">¿Estás seguro?</h3>
+      <p id="modal-text" style="color: var(--text-muted); margin-bottom: 20px;">Esta acción no se puede deshacer.</p>
+      <div style="display: flex; gap: 10px; justify-content: center;">
+        <button class="btn btn-secondary" onclick="closeConfirm(false)">Cancelar</button>
+        <button class="btn btn-delete" onclick="closeConfirm(true)">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+<script type="module">
+    import * as api from './api.js';
+
+    let allProducts = [];
+    let allCategories = [];
+    let allPayments = [];
+    let currentCategoryId = null;
+    let editingId = null;
+    let confirmResolver = null;
+
+    // --- FUNCIONES DE MODALES ---
+    window.openModal = (modalId) => {
+  document.getElementById(modalId).classList.add('active');
+  document.body.style.overflow = 'hidden';
+  
+  // Si abre el modal de tienda, carga categorías
+  if (modalId === 'modal-store') {
+    refreshData();
+    showMainPanel();
+  }
+  
+  // Si abre el modal de pagos, carga los métodos
+  if (modalId === 'modal-payments') {
+    refreshData();
+  }
+
+  // NUEVA CORRECCIÓN: Cargar pedidos cuando se abre el modal de reportes
+  if (modalId === 'modal-orders') {
+    loadOrdersSummary(); 
+  }
+};
+
+    window.closeModal = (modalId) => {
+      document.getElementById(modalId).classList.remove('active');
+      document.body.style.overflow = 'auto'; // Restaura scroll
+    };
+
+    // Cerrar modal con ESC
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeModal('modal-payments');
+        closeModal('modal-store');
+        document.getElementById('modal-confirm').classList.remove('active');
+      }
+    });
+
+    // Cerrar modal al hacer clic fuera del contenido
+    document.querySelectorAll('.modal-overlay').forEach(modal => {
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          modal.classList.remove('active');
+          document.body.style.overflow = 'auto';
+        }
+      });
+    });
+
+    // --- UTILIDADES (mantenidas) ---
+    window.showToast = (msg, type = 'info') => {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.innerText = msg;
+      container.appendChild(toast);
+      setTimeout(() => toast.remove(), 3000);
+    };
+
+    window.customConfirm = (title, text) => {
+      document.getElementById('modal-title').innerText = title;
+      document.getElementById('modal-text').innerText = text;
+      document.getElementById('modal-confirm').classList.add('active');
+      return new Promise(resolve => { confirmResolver = resolve; });
+    };
+
+    window.closeConfirm = (val) => {
+      document.getElementById('modal-confirm').classList.remove('active');
+      if(confirmResolver) confirmResolver(val);
+    };
+
+    const setupPreview = (inputId, imgId) => {
+        const input = document.getElementById(inputId);
+        input?.addEventListener('change', e => {
+            const file = e.target.files[0];
+            const img = document.getElementById(imgId);
+            if (file) { 
+                img.src = URL.createObjectURL(file); 
+                img.classList.remove('hidden'); 
+            }
+        });
+    };
+    setupPreview('new-cat-img', 'pre-cat-img');
+    setupPreview('new-prod-img', 'pre-prod-img');
+
+    // --- CARGA DE DATOS ---
+    async function refreshData() {
+      try {
+        const [categories, products, payments] = await Promise.all([
+            api.getCategories(), 
+            api.getAllProducts(),
+            api.getPaymentMethods()
+        ]);
+        allCategories = categories;
+        allProducts = products;
+        allPayments = payments;
+
+        renderCategories();
+        renderPaymentMethods();
+        if (currentCategoryId) renderProducts();
+      } catch (e) { 
+        console.error("Error al cargar datos:", e);
+        showToast("Error al cargar datos", "error"); 
+      }
+    }
+
+    // --- RENDERIZADO MÉTODOS PAGO ---
+    function renderPaymentMethods() {
+      const list = document.getElementById('payments-list');
+      list.innerHTML = allPayments.map(pay => {
+        const isEditing = editingId === pay.id;
+        const isActive = pay.active !== false;
+        return `
+        <li class="list-item ${isActive ? '' : 'item-inactive'}">
+          <div class="item-content">
+            <div style="flex:1">
+              ${isEditing ? `
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                    <input id="edit-pay-name-${pay.id}" value="${pay.name}">
+                    <select id="edit-pay-mode-${pay.id}">
+                        <option value="none" ${pay.mode==='none'?'selected':''}>Base</option>
+                        <option value="percent" ${pay.mode==='percent'?'selected':''}>Porcentaje</option>
+                        <option value="divide" ${pay.mode==='divide'?'selected':''}>División</option>
+                    </select>
+                    <input id="edit-pay-value-${pay.id}" type="number" step="0.01" value="${pay.value}">
+                    <span style="font-size:10px; color:gray">ID: ${pay.code}</span>
+                </div>
+              ` : `
+                <strong>${pay.name}</strong> <small>(${pay.code})</small><br>
+                <span style="color:var(--accent); font-size:12px">Modo: ${pay.mode} | Valor: ${pay.value}</span>
+              `}
+            </div>
+          </div>
+          <div class="list-actions">
+            ${isEditing ? `
+              <button class="btn btn-save" onclick="saveEditPayment('${pay.id}')">💾</button>
+              <button class="btn btn-secondary" onclick="cancelEdit()">X</button>
+            ` : `
+              <button class="status-badge ${isActive ? 'bg-on' : 'bg-off'}" onclick="togglePayStatus('${pay.id}', ${isActive})">
+                ${isActive ? 'Activo' : 'Inactivo'}
+              </button>
+              <button class="btn btn-edit" onclick="startEdit('${pay.id}')">✏️</button>
+              <button class="btn btn-delete" onclick="handleDeletePayment('${pay.id}')">🗑️</button>
+            `}
+          </div>
+        </li>`;
+      }).join('');
+    }
+
+    // --- RENDERIZADO CATEGORÍAS ---
+    function renderCategories() {
+      const list = document.getElementById('categories-list');
+      list.innerHTML = allCategories.map(cat => {
+        const isEditing = editingId === cat.id;
+        return `
+        <li class="list-item">
+          <div class="item-content">
+            <img src="${cat.image_url || 'https://via.placeholder.com/50'}" width="50" height="50" style="border-radius:8px; object-fit:cover">
+            ${isEditing ? `<input id="edit-cat-name-${cat.id}" value="${cat.name}">` : `<strong>${cat.name}</strong>`}
+          </div>
+          <div class="list-actions">
+            ${isEditing ? `
+              <button class="btn btn-save" onclick="saveEditCategory('${cat.id}')">💾</button>
+              <button class="btn btn-secondary" onclick="cancelEdit()">X</button>
+            ` : `
+              <button class="btn btn-add" style="background:#3b82f6" onclick="showCategoryProducts('${cat.id}', '${cat.name}')">Ver Productos</button>
+              <button class="btn btn-edit" onclick="startEdit('${cat.id}')">✏️</button>
+              <button class="btn btn-delete" onclick="handleDeleteCategory('${cat.id}')">🗑️</button>
+            `}
+          </div>
+        </li>`;
+      }).join('');
+    }
+
+    // --- RENDERIZADO PRODUCTOS ---
+    function renderProducts() {
+      const list = document.getElementById('products-list');
+      const filtered = allProducts.filter(p => String(p.category_id) === String(currentCategoryId));
+      list.innerHTML = filtered.map(p => {
+        const isEditing = editingId === p.id;
+        const isActive = p.active !== false;
+        return `
+        <li class="list-item ${isActive ? '' : 'item-inactive'}">
+          <div class="item-content">
+            <div style="flex:1">
+              ${isEditing ? `
+                <input id="edit-prod-name-${p.id}" value="${p.name}">
+                <input id="edit-prod-price-${p.id}" value="${p.price}" type="number" step="0.01">
+              ` : `
+                <strong>${p.name}</strong><br>
+                <span style="color:#10b981">$${p.price} <small style="color:gray">(Base)</small></span>
+              `}
+            </div>
+          </div>
+          <div class="list-actions">
+            ${isEditing ? `
+              <button class="btn btn-save" onclick="saveEditProduct('${p.id}')">💾</button>
+              <button class="btn btn-secondary" onclick="cancelEdit()">X</button>
+            ` : `
+              <button class="status-badge ${isActive ? 'bg-on' : 'bg-off'}" onclick="toggleStatus('${p.id}', ${isActive})">
+                ${isActive ? 'On' : 'Off'}
+              </button>
+              <button class="btn btn-edit" onclick="startEdit('${p.id}')">✏️</button>
+              <button class="btn btn-delete" onclick="handleDeleteProduct('${p.id}')">🗑️</button>
+            `}
+          </div>
+        </li>`;
+      }).join('');
+    }
+
+    // --- ACCIONES MÉTODOS PAGO (mantenidas) ---
+    window.handleAddPayment = async () => {
+        const name = document.getElementById('pay-name').value;
+        const code = document.getElementById('pay-code').value;
+        const mode = document.getElementById('pay-mode').value;
+        const value = document.getElementById('pay-value').value;
+        if(!name || !code) return showToast("Faltan datos", "error");
+        try {
+            await api.createPaymentMethod({ name, code, mode, value: parseFloat(value), active: true });
+            showToast("Método creado");
+            // Limpiar formulario
+            document.getElementById('pay-name').value = '';
+            document.getElementById('pay-code').value = '';
+            document.getElementById('pay-value').value = '0';
+            refreshData();
+        } catch (e) { showToast("Error al crear", "error"); }
+    };
+
+    window.saveEditPayment = async (id) => {
+        const name = document.getElementById(`edit-pay-name-${id}`).value;
+        const mode = document.getElementById(`edit-pay-mode-${id}`).value;
+        const value = document.getElementById(`edit-pay-value-${id}`).value;
+        await api.updatePaymentMethod(id, { name, mode, value: parseFloat(value) });
+        editingId = null;
+        refreshData();
+    };
+
+    window.togglePayStatus = async (id, current) => {
+        await api.updatePaymentMethod(id, { active: !current });
+        refreshData();
+    };
+
+    window.handleDeletePayment = async (id) => {
+        if(await customConfirm("¿Eliminar método?", "Esto afectará los cálculos de la tienda.")) {
+            await api.deletePaymentMethod(id);
+            refreshData();
+        }
+    };
+
+    // --- ACCIONES CATEGORÍAS (mantenidas) ---
+    window.handleAddCategory = async () => {
+        const input = document.getElementById('new-cat-name');
+        const file = document.getElementById('new-cat-img').files[0];
+        if(!input.value) return showToast("Nombre obligatorio", "error");
+        try {
+            let url = null;
+            if(file) url = await api.uploadImage('categories', file);
+            await api.createCategory(input.value, url);
+            refreshData();
+            input.value = ""; 
+            document.getElementById('new-cat-img').value = "";
+            document.getElementById('pre-cat-img').src = "";
+            document.getElementById('pre-cat-img').classList.add('hidden');
+            showToast("Categoría creada");
+        } catch (e) { showToast("Error al crear", "error"); }
+    };
+
+    window.handleDeleteCategory = async (id) => {
+        const cat = allCategories.find(c => String(c.id) === String(id));
+        if(await customConfirm("¿Borrar categoría?", "Se eliminarán los productos asociados.")) {
+            await api.deleteCategory(id, cat.image_url);
+            showToast("Eliminado correctamente");
+            refreshData();
+        }
+    };
+
+    window.saveEditCategory = async (id) => {
+        const name = document.getElementById(`edit-cat-name-${id}`).value;
+        await api.updateCategory(id, { name });
+        editingId = null;
+        refreshData();
+    };
+
+    // --- ACCIONES PRODUCTOS (mantenidas) ---
+    window.handleAddProduct = async () => {
+        const nameInp = document.getElementById('new-prod-name');
+        const priceInp = document.getElementById('new-prod-price');
+        const file = document.getElementById('new-prod-img').files[0];
+        if(!nameInp.value || !priceInp.value) return showToast("Faltan datos", "error");
+        try {
+            let url = null;
+            if(file) url = await api.uploadImage('products', file);
+            await api.createProduct({ 
+                name: nameInp.value, 
+                price: parseFloat(priceInp.value), 
+                image_url: url, 
+                category_id: currentCategoryId 
+            });
+            refreshData();
+            nameInp.value = ""; 
+            priceInp.value = ""; 
+            document.getElementById('new-prod-img').value = "";
+            document.getElementById('pre-prod-img').src = "";
+            document.getElementById('pre-prod-img').classList.add('hidden');
+            showToast("Producto agregado");
+        } catch (e) { showToast("Error al agregar", "error"); }
+    };
+
+    window.handleDeleteProduct = async (id) => {
+        const prod = allProducts.find(p => String(p.id) === String(id));
+        if(await customConfirm("¿Borrar producto?", "Se eliminará permanentemente.")) {
+            await api.deleteProduct(id, prod.image_url);
+            refreshData();
+        }
+    };
+
+    window.saveEditProduct = async (id) => {
+        const name = document.getElementById(`edit-prod-name-${id}`).value;
+        const price = document.getElementById(`edit-prod-price-${id}`).value;
+        await api.updateProduct(id, { name, price: parseFloat(price) });
+        editingId = null;
+        refreshData();
+    };
+
+    window.toggleStatus = async (id, current) => {
+        await api.updateProduct(id, { active: !current });
+        refreshData();
+    };
+
+    // --- NAVEGACIÓN MODIFICADA PARA MODALES ---
+    window.showCategoryProducts = (id, name) => {
+        currentCategoryId = id;
+        editingId = null;
+        // Ocultar categorías, mostrar productos
+        document.getElementById('section-categories').classList.add('hidden');
+        document.getElementById('section-products').classList.remove('hidden');
+        // Actualizar título
+        document.getElementById('current-cat-title').innerText = `Productos en: ${name}`;
+        // Renderizar productos
+        renderProducts();
+    };
+
+    window.showMainPanel = () => {
+        currentCategoryId = null;
+        editingId = null;
+        // Ocultar productos, mostrar categorías
+        document.getElementById('section-products').classList.add('hidden');
+        document.getElementById('section-categories').classList.remove('hidden');
+    };
+
+    window.startEdit = (id) => { 
+        editingId = id; 
+        renderCategories(); 
+        renderPaymentMethods(); 
+        if(currentCategoryId) renderProducts(); 
+    };
+    
+    window.cancelEdit = () => { 
+        editingId = null; 
+        renderCategories(); 
+        renderPaymentMethods(); 
+        if(currentCategoryId) renderProducts(); 
+    };
+
+    window.loadOrdersSummary = async () => {
+    try {
+        const summaryList = document.getElementById('orders-summary-list');
+        const totalCountSpan = document.getElementById('total-orders-count');
+        summaryList.innerHTML = "<p>Cargando reportes...</p>";
+
+        // 1. Obtener pedidos desde la API
+        const orders = await api.getOrders(); // Asumiendo que esta función existe en api.js
+        
+        if (!orders || orders.length === 0) {
+            summaryList.innerHTML = "<li>No hay pedidos registrados</li>";
+            totalCountSpan.innerText = "0";
+            return;
+        }
+
+        // 2. Agrupar por fecha (YYYY-MM-DD)
+        const summary = {};
+        orders.forEach(order => {
+            // Extraer solo la fecha del timestamp de la base de datos
+            const date = new Date(order.created_at).toISOString().split('T')[0];
+            summary[date] = (summary[date] || 0) + 1;
+        });
+
+        // 3. Ordenar por fecha descendente (más recientes primero)
+        const sortedDates = Object.keys(summary).sort((a, b) => new Date(b) - new Date(a));
+
+        // 4. Renderizar
+        totalCountSpan.innerText = orders.length;
+        summaryList.innerHTML = sortedDates.map(date => `
+            <li class="list-item" style="display: flex; justify-content: space-between; align-items: center; padding: 15px;">
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <span style="background: #334155; padding: 8px 12px; border-radius: 8px; color: #93c5fd; font-weight: bold;">
+                        📅 ${formatDate(date)}
+                    </span>
+                </div>
+                <div style="font-size: 1.2rem; font-weight: bold; color: var(--success);">
+                    ${summary[date]} ${summary[date] === 1 ? 'pedido' : 'pedidos'}
+                </div>
+            </li>
+        `).join('');
+
+    } catch (e) {
+        console.error("Error al cargar pedidos:", e);
+        showToast("Error al cargar reporte de pedidos", "error");
+    }
+};
+
+// Función auxiliar para poner la fecha más bonita
+function formatDate(dateStr) {
+    const options = { weekday: 'short', year: 'numeric', month: 'long', day: 'numeric' };
+    return new Date(dateStr + "T00:00:00").toLocaleDateString('es-ES', options);
+}
+
+    // Cargar datos iniciales
+    refreshData();
+</script>
+</body>
+</html>
