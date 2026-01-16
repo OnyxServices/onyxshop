@@ -598,11 +598,11 @@
         <i data-lucide="phone"></i>
         <span>Llamar ahora</span>
       </a>
-      <div style="height: 1px; background: var(--border); margin: 2px 0;"></div>
+      <!--<div style="height: 1px; background: var(--border); margin: 2px 0;"></div>
       <a href="javascript:void(0)" onclick="openSmsApp('+5353910527')" class="support-item">
   <i data-lucide="message-square"></i>
   <span>Enviar SMS</span>
-</a>
+</a>-->
     </div>
 
     <!-- Botón de Soporte Actualizado -->
@@ -2042,7 +2042,7 @@ function clearOrderForm() {
   });
 }
 
-/*nuevaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa*/
+
 // Función para abrir/cerrar el menú de soporte
 window.toggleSupportMenu = (e) => {
   e.stopPropagation(); // Evita que el clic cierre el menú inmediatamente
@@ -2076,14 +2076,9 @@ window.openSmsApp = (phone) => {
 
 // Iniciar app
 init();
-</script>
-  <script>
-function openSmsApp(phoneNumber) {
-    // Enviar mensaje a Kodular
-    window.postMessage("SMS:" + phoneNumber);
-}
+
+// Iniciar app
+init();
 </script>
 </body>
 </html>
-
-
