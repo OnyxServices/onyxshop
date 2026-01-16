@@ -1659,10 +1659,11 @@ window.confirmMlcPayment = async () => {
     const orderId = `CS-MLC-${Date.now().toString().slice(-6)}`;
     const uploadedUrl = await uploadReceiptToSupabase(mlcReceiptFile, orderId);
     
+    // Capturamos los datos del formulario incluyendo la Referencia
     const name = document.getElementById('order-name').value.trim();
     const phone = document.getElementById('order-phone').value.trim();
     const addr = document.getElementById('order-address').value.trim();
-    const ref = document.getElementById('order-reference').value.trim();
+    const ref = document.getElementById('order-reference').value.trim(); // <--- Referencia
 
     let totalBase = 0;
     const itemsList = cart.map(item => {
@@ -1685,112 +1686,32 @@ window.confirmMlcPayment = async () => {
       status: 'pending'
     });
 
+    // CONSTRUCCIÓN DEL MENSAJE CORREGIDA (Incluyendo Referencia)
     const text = encodeURIComponent(
       `👑 *NUEVO PAGO MLC*\nPedido: #${orderId}\n\n` +
-      `👤 *Cliente:* ${name}\n📍 *Dirección:* ${addr}\n📞 *Tel:* +53${phone}\n` +
+      `👤 *Cliente:* ${name}\n` +
+      `📍 *Dirección:* ${addr}\n` +
+      (ref ? `🏠 *Referencia:* ${ref}\n` : '') + // <--- Se añade esta línea al mensaje
+      `📞 *Tel:* +53${phone}\n` +
       `📸 *Comprobante:* ${uploadedUrl}\n\n` +
-      `🛍️ *PRODUCTOS:*\n${itemsList}\n\n💰 *TOTAL:* ${finalTotal.text}`
+      `🛍️ *PRODUCTOS:*\n${itemsList}\n\n` +
+      `💰 *TOTAL:* ${finalTotal.text}`
     );
 
     setTimeout(() => { window.location.href = `https://wa.me/+5353910527?text=${text}`; }, 100);
 
+    // Limpieza total
     cart = [];
+    clearOrderForm(); // <--- Limpia el formulario (Nombre, Dir, Ref, Tel)
     saveCartToStorage();
     updateCartUI();
     toggleMlcModal(false);
+    toggleCart(false); // <--- Cierra el carrito también
   } catch (e) {
     console.error(e);
-    alert("Error al subir comprobante");
+    alert("Error al enviar el pago");
     btn.disabled = false;
     loader.style.display = 'none';
-  }
-};
-
-/**
- * Confirmar pago Zelle - Flujo principal
- */
-window.confirmZellePayment = async () => {
-  if (!zelleReceiptFile) {
-    showFileError('Por favor, selecciona una imagen del comprobante');
-    return;
-  }
-  
-  // Elementos de la interfaz para mostrar progreso
-  const btnConfirm = document.getElementById('confirm-zelle-btn');
-  const btnSelect = document.getElementById('select-receipt-btn');
-  const progress = document.getElementById('upload-progress');
-  const errorMsg = document.getElementById('file-error');
-
-  btnConfirm.disabled = true;
-  btnSelect.disabled = true;
-  progress.style.display = 'block';
-  errorMsg.style.display = 'none';
-  
-  try {
-    // 1. Crear un ID de pedido único
-    const orderId = `CS-Z-${Date.now().toString().slice(-6)}`;
-    
-    // 2. Subir la imagen a Supabase (esperamos a que termine)
-    const uploadedUrl = await uploadReceiptToSupabase(zelleReceiptFile, orderId);
-    
-    // 3. Capturar datos del cliente
-    const name = document.getElementById('order-name').value.trim();
-    const addr = document.getElementById('order-address').value.trim();
-    const ref = document.getElementById('order-reference').value.trim();
-    const phone = document.getElementById('order-phone').value.trim();
-    
-    let totalBase = 0;
-    const itemsList = cart.map(item => {
-      totalBase += (parseFloat(item.price) * item.qty);
-      const pObj = getFinalPrice(item.price);
-      return `• *${item.qty}x* ${item.name} _(${pObj.text})_`;
-    }).join('\n');
-    
-    const finalTotal = getFinalPrice(totalBase);
-
-    // 4. Registrar pedido en la base de datos
-    await createOrderInSupabase({
-      order_id: orderId,
-      customer_name: name,
-      phone: phone,
-      address: addr,
-      reference: ref,
-      items: cart,
-      total_text: finalTotal.text,
-      payment_method: 'Zelle',
-      receipt_url: uploadedUrl,
-      status: 'pending'
-    });
-
-    // 5. Preparar mensaje de WhatsApp
-    const text = encodeURIComponent(
-      `👑 *NUEVO PEDIDO ZELLE*\nPedido: #${orderId}\n\n` +
-      `👤 *Cliente:* ${name}\n📍 *Dirección:* ${addr}\n` +
-      (ref ? `🏠 *Ref:* ${ref}\n` : '') +
-      `📞 *Tel:* +53${phone}\n📸 *Comprobante:* ${uploadedUrl}\n\n` +
-      `🛍️ *PRODUCTOS:*\n${itemsList}\n\n💰 *TOTAL:* ${finalTotal.text}`
-    );
-
-    // 6. REDIRECCIÓN COMPATIBLE CON SAFARI
-    // Usamos location.href en lugar de window.open para evitar bloqueos
-    setTimeout(() => {
-      window.location.href = `https://wa.me/+5353910527?text=${text}`;
-    }, 100);
-
-    // Limpiar todo
-    cart = [];
-    saveCartToStorage();
-    updateCartUI();
-    toggleZelleModal(false);
-    toggleCart(false);
-
-  } catch (error) {
-    console.error('Error:', error);
-    errorMsg.textContent = "Error de conexión. Inténtalo de nuevo.";
-    errorMsg.style.display = 'block';
-    btnConfirm.disabled = false;
-    btnSelect.disabled = false;
-    progress.style.display = 'none';
   }
 };
 
@@ -1900,6 +1821,7 @@ window.confirmTraPayment = async () => {
 
     // Limpiar carrito y cerrar modales
     cart = [];
+    clearOrderForm();
     saveCartToStorage();
     updateCartUI();
     toggleTraModal(false);
