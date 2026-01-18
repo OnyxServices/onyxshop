@@ -139,7 +139,7 @@ function notifyNewProduct(categoryName) {
     <div class="product-notif-icon"><i data-lucide="sparkles"></i></div>
     <div>
       <div style="font-size: 0.7rem; opacity: 0.8; text-transform: uppercase;">¡Recién llegado!</div>
-      <div style="font-size: 0.9rem;">Nuevo producto en ${categoryName} 🛍️ </div>
+      <div style="font-size: 0.9rem;">Nuevo producto en ${categoryName} 🏃🏽 </div>
     </div>
   `;
   document.body.appendChild(notif);
