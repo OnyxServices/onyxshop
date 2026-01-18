@@ -402,3 +402,128 @@
       align-items: center;
       gap: 12px;
     }
+
+   /* --- AJUSTES RESPONSIVE --- */
+
+@media (max-width: 768px) {
+    body {
+        padding: 10px;
+    }
+
+    /* Cabecera: Apilar elementos */
+    header {
+        flex-direction: column !important;
+        align-items: center !important;
+        gap: 20px;
+        text-align: center;
+    }
+
+    header h1 {
+        font-size: 1.8rem;
+    }
+
+    /* Grid de Dashboard: 2 columnas en tablets, 1 en móviles */
+    .dashboard-grid {
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 15px;
+    }
+
+    .stat-card {
+        padding: 20px 10px;
+    }
+
+    .stat-card .icon {
+        font-size: 2rem;
+    }
+
+    /* Modales: Menos padding y más ancho */
+    .modal-content {
+        padding: 20px;
+        width: 98%;
+        border-radius: 20px;
+    }
+
+    /* Formularios: Forzar una sola columna */
+    .form-row {
+        grid-template-columns: 1fr !important;
+        gap: 10px;
+        padding: 15px;
+    }
+
+    .form-field input, .form-field select {
+        font-size: 16px; /* Evita el zoom automático en iOS */
+    }
+
+    /* Listas (Productos/Categorías/Pagos): Reorganizar */
+    .list-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+        position: relative;
+    }
+
+    .item-info {
+        width: 100%;
+    }
+
+    /* Botones de acción en las listas: Ancho completo */
+    .list-item div[style*="flex"] {
+        width: 100%;
+        display: grid !important;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+    }
+
+    .btn {
+        width: 100%;
+        padding: 10px;
+    }
+
+    /* Estadísticas del reporte: 2 columnas */
+    #modal-orders .stat-card {
+        padding: 15px 10px;
+    }
+    
+    #modal-orders .modal-content > div[style*="grid-template-columns"] {
+        grid-template-columns: 1fr 1fr !important;
+    }
+
+    /* Ajuste específico para el encabezado del reporte */
+    .modal-header-actions {
+        flex-direction: column;
+        width: 100%;
+        gap: 10px;
+    }
+
+    .btn-danger-glass {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    header h1 {
+        font-size: 1.5rem;
+    }
+
+    /* Dashboard en una sola columna en móviles muy pequeños */
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+
+    /* En el reporte de ventas, bajar a 1 columna las cajas de dinero */
+    #modal-orders .modal-content > div[style*="grid-template-columns"] {
+        grid-template-columns: 1fr !important;
+    }
+
+    /* Ajustar imágenes de la lista */
+    .item-img {
+        width: 40px;
+        height: 40px;
+    }
+}
+
+/* Ajuste de scroll para móviles en los modales */
+.modal-content {
+    -webkit-overflow-scrolling: touch;
+}
