@@ -227,3 +227,33 @@ export const deleteAllOrdersData = async () => {
     }
 
 };
+
+// Si tienes algo así, asegúrate de incluir created_at
+export const getAllProducts = async () => {
+  const { data, error } = await supabase
+    .from('products')
+    .select('id, name, price, image_url, category_id, active, created_at, stock')
+  // ...
+}
+
+
+export async function subtractProductStock(productId, quantityToSubtract) {
+  // Primero obtenemos el stock actual
+  const { data: product, error: fetchError } = await supabase
+    .from('products')
+    .select('stock')
+    .eq('id', productId)
+    .single();
+
+  if (fetchError) throw fetchError;
+
+  const newStock = Math.max(0, product.stock - quantityToSubtract);
+
+  // Actualizamos con el nuevo valor
+  const { error: updateError } = await supabase
+    .from('products')
+    .update({ stock: newStock })
+    .eq('id', productId);
+
+  if (updateError) throw updateError;
+}

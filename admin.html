@@ -43,25 +43,25 @@
         <h2>💳 Pagos y Tasas</h2>
         <button class="btn btn-delete" style="padding: 5px 15px;" onclick="closeModal('modal-payments')">Cerrar</button>
       </div>
-      
       <div class="form-row">
-        <div class="form-field">
-          <label>Nombre del Método</label>
-          <input id="pay-name" placeholder="Ej: Zelle / Pago Móvil">
-        </div>
-        <div class="form-field">
-          <label>Cálculo</label>
-          <select id="pay-mode">
-            <option value="none">Precio Base</option>
-            <option value="percent">Porcentaje (+ %)</option>
-            <option value="divide">Tasa Cambio (/)</option>
-          </select>
-        </div>
-        <div class="form-field">
-          <label>Valor</label>
-          <input id="pay-value" type="number" step="0.01" value="0">
-        </div>
-        <button class="btn btn-add" style="height: 48px; align-self: flex-end;" onclick="handleAddPayment()">➕ Añadir</button>
+  <div class="form-field">
+    <label>Moneda / Método</label>
+    <input id="pay-name" placeholder="Ej: Pago Móvil">
+  </div>
+  <div class="form-field">
+    <label>Cálculo</label>
+    <select id="pay-mode">
+      <option value="none">Precio Base ($)</option>
+      <option value="percent">Porcentaje (+%)</option>
+      <option value="divide">Tasa Cambio (/)</option>
+    </select>
+  </div>
+  <div class="form-field">
+    <label>Valor</label>
+    <input id="pay-value" type="number" step="0.01" value="1">
+  </div>
+  <button class="btn btn-add" style="height: 48px; align-self: flex-end;" onclick="handleAddPayment()">➕ Añadir</button>
+</div>
       </div>
       <ul id="payments-list"></ul>
     </div>
@@ -91,26 +91,33 @@
       </div>
 
       <div id="section-products" class="hidden">
-        <button class="btn" style="background: rgba(255,255,255,0.1); color: white; margin-bottom: 20px;" onclick="showMainPanel()">⬅ Volver</button>
-        <h3 id="current-cat-title" style="margin-bottom: 20px;"></h3>
-        <div class="form-row">
-          <div class="form-field">
-            <label>Producto</label>
-            <input id="new-prod-name" placeholder="Nombre">
-          </div>
-          <div class="form-field">
-            <label>Precio $</label>
-            <input id="new-prod-price" type="number" step="0.01">
-          </div>
-          <div class="form-field">
-            <label>Foto</label>
-            <input type="file" id="new-prod-img" accept="image/*" style="font-size: 10px;">
-          </div>
-          <button class="btn btn-add" style="height: 48px; align-self: flex-end;" onclick="handleAddProduct()">➕ Añadir</button>
-        </div>
-        <ul id="products-list"></ul>
-      </div>
+  <button class="btn" style="background: rgba(255,255,255,0.1); color: white; margin-bottom: 20px;" onclick="showMainPanel()">⬅ Volver</button>
+  <h3 id="current-cat-title" style="margin-bottom: 20px;"></h3>
+  
+  <div class="form-row">
+    <div class="form-field">
+      <label>Producto</label>
+      <input id="new-prod-name" placeholder="Nombre">
     </div>
+    <div class="form-field">
+      <label>Precio $</label>
+      <input id="new-prod-price" type="number" step="0.01">
+    </div>
+    <!-- CAMPO DE STOCK AÑADIDO ABAJO -->
+    <div class="form-field">
+      <label>Stock (Cant.)</label>
+      <input id="new-prod-stock" type="number" value="0">
+    </div>
+    <div class="form-field">
+      <label>Foto</label>
+      <input type="file" id="new-prod-img" accept="image/*" style="font-size: 10px;">
+    </div>
+    <button class="btn btn-add" style="height: 48px; align-self: flex-end;" onclick="handleAddProduct()">➕ Añadir</button>
+  </div>
+  <ul id="products-list"></ul>
+</div>
+
+      </div>
   </div>
 
   <!-- MODAL REPORTES -->
@@ -200,6 +207,12 @@
       <label>Precio $</label>
       <input id="edit-prod-price" type="number" step="0.01">
     </div>
+
+    <div class="form-field" style="margin-bottom: 15px;">
+      <label>Stock disponible</label>
+      <input id="edit-prod-stock" type="number">
+    </div>
+
     <div class="form-field" style="margin-bottom: 25px;">
       <label>Nueva Imagen (Opcional)</label>
       <input type="file" id="edit-prod-img" accept="image/*" style="font-size: 10px;">

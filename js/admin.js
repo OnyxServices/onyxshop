@@ -139,6 +139,10 @@ function renderProducts() {
         <div>
           <p style="font-weight:700;">${p.name}</p>
           <p style="color:var(--success); font-weight:700;">$${p.price}</p>
+         <span style="margin-left:10px; color:${p.stock <= 0 ? 'var(--danger)' : 'var(--text-muted)'}; font-size:0.8rem;">
+              📦 Stock: ${p.stock || 0}
+         </span>
+
         </div>
       </div>
       <div style="display:flex; gap:8px;">
@@ -242,7 +246,8 @@ window.openEditProduct = (id) => {
     document.getElementById('edit-prod-id').value = prod.id;
     document.getElementById('edit-prod-name').value = prod.name;
     document.getElementById('edit-prod-price').value = prod.price;
-    document.getElementById('edit-prod-img').value = ""; // Limpiar input file
+    document.getElementById('edit-prod-stock').value = prod.stock || 0; // Carga el stock actual
+    document.getElementById('edit-prod-img').value = ""; 
     
     openModal('modal-edit-product');
 };
@@ -251,6 +256,7 @@ window.handleUpdateProduct = async () => {
     const id = document.getElementById('edit-prod-id').value;
     const name = document.getElementById('edit-prod-name').value;
     const price = document.getElementById('edit-prod-price').value;
+    const stock = document.getElementById('edit-prod-stock').value; // Captura stock editado
     const file = document.getElementById('edit-prod-img').files[0];
 
     if (!name || !price) return showToast("Nombre y precio son obligatorios", "error");
@@ -258,10 +264,10 @@ window.handleUpdateProduct = async () => {
     try {
         let updateData = {
             name: name,
-            price: parseFloat(price)
+            price: parseFloat(price),
+            stock: parseInt(stock) || 0 // Actualiza stock
         };
 
-        // Si el usuario subió una nueva foto, la procesamos
         if (file) {
             showToast("Subiendo nueva imagen...");
             const newUrl = await api.uploadImage('products', file);
@@ -275,7 +281,7 @@ window.handleUpdateProduct = async () => {
         refreshData();
     } catch (e) {
         console.error(e);
-        showToast("Error al actualizar", "error");
+        showToast("Error al actualizar. ¿Creaste la columna 'stock' en Supabase?", "error");
     }
 };
 
@@ -302,16 +308,30 @@ window.handleUpdateProduct = async () => {
     };
 
     window.handleAddProduct = async () => {
-        const nameInp = document.getElementById('new-prod-name');
-        const priceInp = document.getElementById('new-prod-price');
-        const file = document.getElementById('new-prod-img').files[0];
-        if(!nameInp.value || !priceInp.value) return showToast("Datos incompletos", "error");
+    const nameInp = document.getElementById('new-prod-name');
+    const priceInp = document.getElementById('new-prod-price');
+    const stockInp = document.getElementById('new-prod-stock'); // Captura stock
+    const file = document.getElementById('new-prod-img').files[0];
+
+    if(!nameInp.value || !priceInp.value) return showToast("Datos incompletos", "error");
+
+    try {
         let url = file ? await api.uploadImage('products', file) : null;
-        await api.createProduct({ name: nameInp.value, price: parseFloat(priceInp.value), image_url: url, category_id: currentCategoryId });
+        await api.createProduct({ 
+            name: nameInp.value, 
+            price: parseFloat(priceInp.value), 
+            stock: parseInt(stockInp.value) || 0, // Envía stock
+            image_url: url, 
+            category_id: currentCategoryId 
+        });
         refreshData();
-        nameInp.value = ""; priceInp.value = "";
+        // Limpiar campos
+        nameInp.value = ""; priceInp.value = ""; stockInp.value = "0";
         showToast("Producto añadido");
-    };
+    } catch (e) {
+        showToast("Error al crear producto", "error");
+    }
+};
 
     window.handleDeleteCategory = async (id) => {
         if(await customConfirm("¿Eliminar?", "Se borrarán todos sus productos.")) {
