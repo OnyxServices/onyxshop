@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Cuban-Store | Premium Quality</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YK3NZLGRLW"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-YK3NZLGRLW');
+  </script>
+  <link rel="stylesheet" type="text/css" href="/css/index.css">
+</head>
+<body>
+  <div id="splash-screen">
+    <div class="logo-premium">Cuban Store</div>
+    <div class="splash-subtitle">"🛒Todo lo que usted busca👜"</div>
+    <div class="loader-container"><div class="loader-bar"></div></div>
+    <div class="splash-footer">2026 Onyx-Services</div>
+  </div>
+
+  <!--Header-->
+  <header>
+    <div class="brand">
+      <img src="https://onyxservices.github.io/cubanstore/jpg/1.jpg" alt="Logo">
+      <span>CUBAN-STORE</span>
+    </div>
+    <div class="header-actions">
+      <!-- SELECTOR DE PAGO DINÁMICO -->
+      <select id="payment-selector"></select>
+      <button class="cart-trigger" id="cart-btn-anchor" onclick="toggleCart(true)">
+        <i data-lucide="shopping-cart"></i>
+        <div class="cart-count" id="cart-count">0</div>
+      </button>
+    </div>
+    <div id="currency-hint" class="currency-hint">
+      <div class="currency-hint-pointer"></div>
+      <i data-lucide="info" style="width:14px; height:14px;"></i>
+    Cambie aquí el tipo de moneda
+    </div>
+  </header>
+
+  <main class="container">
+    <section id="categories-view">
+      <div class="section-header">
+        <i data-lucide="layout-grid" style="color: var(--accent)"></i>
+        <h2>Categorías</h2>
+      </div>
+      <div class="grid" id="categories-grid"></div>
+    </section>
+
+    <section id="products-view" style="display: none;">
+      <button onclick="showCategories()" class="btn-back-sticky">
+        <i data-lucide="chevron-left"></i> Volver a Categorías
+      </button>
+
+      <div class="section-header">
+        <i data-lucide="package" style="color: var(--accent)"></i>
+        <h2 id="current-cat-name">Productos</h2>
+      </div>
+      <div class="grid" id="products-grid"></div>
+      <div id="infinite-sentinel" class="sentinel">
+        <div class="scroll-loader"></div>
+      </div>
+    </section>
+  </main>
+
+  <!--//////////////////////////////////////////////Footer////////////////////////////////////-->
+  <footer class="footer-fixed">    
+    <div id="support-menu" class="support-popover">
+      <a href="tel:+5353910527" class="support-item">
+        <i data-lucide="phone"></i>
+        <span>Llamar ahora</span>
+      </a>
+      <!--<div style="height: 1px; background: var(--border); margin: 2px 0;"></div>
+      <a href="javascript:void(0)" onclick="openSmsApp('+5353910527')" class="support-item">
+        <i data-lucide="message-square"></i>
+        <span>Enviar SMS</span>
+      </a>-->
+    </div>    
+    <button class="footer-link" onclick="toggleSupportMenu(event)">
+      <i data-lucide="life-buoy"></i>
+      <span>Soporte</span>
+    </button>
+
+    <div style="width: 1px; height: 20px; background: var(--border);"></div>
+    
+    <button class="footer-link" onclick="toggleCoffeeModal(true)">
+      <i data-lucide="coffee"></i>
+      <span>Café</span>
+    </button>
+    
+    <div style="width: 1px; height: 20px; background: var(--border);"></div>
+    
+    <a href="https://www.facebook.com/share/19h915VN2Q/?mibextid=wwXIfr" target="_blank" class="footer-link">
+      <i data-lucide="facebook"></i>
+      <span>Facebook</span>
+    </a>
+  </footer>
+     
+     <!-- /////////////////MODAL COFFEE/////////////////////////////////////////// -->
+  <div class="drawer-overlay" id="coffee-overlay" onclick="toggleCoffeeModal(false)">
+    <div class="modal-center" onclick="event.stopPropagation()">
+      <h3 style="margin:0; letter-spacing:1px; color: var(--accent);">Invítame un café ☕</h3>
+      <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 10px; line-height: 1.4;">Ayudas a mantener esta app para brindarte el mejor servicio.</p>
+      
+      <img src="https://onyxservices.github.io/cubanstore/jpg/donar-cafe.jpg" alt="Donación" class="donation-img">
+
+      <!-- BLOQUE DE TARJETA -->
+      <div class="card-copy-box" style="background: var(--primary); border: 1px solid var(--border); border-radius: 10px; padding: 12px; margin: 15px 0; display: flex; align-items: center; justify-content: space-between;">
+        <span id="card-number" style="font-family: monospace; color: var(--accent); font-weight: bold; font-size: 1rem;">9204-1299-7869-4034</span>
+        <button onclick="window.copyToClipboard('9204-1299-7869-4034')" style="background: var(--accent); color: var(--primary); border: none; padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center;">
+          <i data-lucide="copy" style="width: 16px; height: 16px;"></i>
+        </button>
+      </div>
+
+      <button class="btn-action" style="width: 100%;" onclick="toggleCoffeeModal(false)">ENTENDIDO</button>
+    </div>
+  </div>
+
+<!-- MODAL ZELLE -->
+<div class="drawer-overlay" id="zelle-overlay" onclick="toggleZelleModal(false)">
+  <div class="modal-center" onclick="event.stopPropagation()" style="max-width: 420px; text-align: left;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+      <h3 style="margin:0; letter-spacing:1px; color: var(--accent);">Confirmar pago por Zelle</h3>
+      <button onclick="toggleZelleModal(false)" style="background:none; border:none; color:white; cursor:pointer;">
+        <i data-lucide="x"></i>
+      </button>
+    </div>
+    
+    <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px; line-height: 1.4;">
+      Por favor envía el pago a la cuenta Zelle indicada y sube la captura de la transacción. Sin comprobante no se procesará el pedido.
+    </p>
+    
+    <!-- Cuenta Zelle -->
+    <div class="card-copy-box">
+      <span class="card-number">Zelle: zelle@correo.com</span>
+      <button class="copy-btn" onclick="copyToClipboard('zelle@correo.com')">
+        <i data-lucide="copy" style="width: 16px; height: 16px;"></i>
+      </button>
+    </div>
+    
+    <!-- Resumen del pedido -->
+    <div style="background: var(--primary); border-radius: 8px; padding: 12px; margin: 15px 0;">
+      <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+        <span style="color: var(--text-muted);">Productos:</span>
+        <span id="zelle-summary-items" style="font-weight: 600;">0</span>
+      </div>
+      <div style="display: flex; justify-content: space-between;">
+        <span style="color: var(--text-muted);">Total:</span>
+        <span id="zelle-summary-total" style="color: var(--accent); font-weight: 700;">$0</span>
+      </div>
+    </div>
+    
+    <!-- Input de imagen -->
+    <div style="margin: 20px 0;">
+      <input type="file" id="receipt-file" accept="image/png, image/jpeg, .png, .jpg, .jpeg" 
+             style="display: none;" onchange="handleReceiptFileInput(event)">
+      
+      <button id="select-receipt-btn" class="btn-action" style="width: 100%;" onclick="document.getElementById('receipt-file').click()">
+        <i data-lucide="upload"></i> SELECCIONAR IMAGEN
+      </button>
+      
+      <div id="receipt-preview-container" style="display: none; margin-top: 15px;">
+        <div style="position: relative;">
+          <img id="receipt-preview" style="width: 100%; border-radius: 8px; border: 1px solid var(--border);">
+          <button id="remove-receipt" 
+        style="position: absolute; top: 10px; right: 10px; background: var(--error); color: white; border: none; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer;"
+        onclick="removeReceiptPreview()">
+  <i data-lucide="x" style="width: 16px;"></i>
+</button>
+        </div>
+        <p id="file-info" style="color: var(--text-muted); font-size: 0.8rem; margin-top: 5px; text-align: center;"></p>
+      </div>
+      
+      <div id="upload-progress" style="display: none; text-align: center; margin: 15px 0;">
+        <div class="scroll-loader" style="margin: 0 auto;"></div>
+        <p style="color: var(--accent); font-size: 0.85rem; margin-top: 8px;">Subiendo comprobante...</p>
+      </div>
+      
+      <p id="file-error" style="color: var(--error); font-size: 0.8rem; margin-top: 5px; display: none;"></p>
+    </div>
+    
+    <!-- Botones -->
+    <div style="display: flex; gap: 10px; margin-top: 20px;">
+      <button class="btn-action" style="flex: 1; background: transparent; border: 1px solid var(--border); color: var(--text-main);" 
+              onclick="toggleZelleModal(false)" id="cancel-zelle-btn">
+        CANCELAR
+      </button>
+      <button class="btn-action" style="flex: 1;" id="confirm-zelle-btn" disabled onclick="confirmZellePayment()">
+        <i data-lucide="check-circle"></i> CONFIRMAR PAGO
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL TRANSFERENCIA -->
+<div class="drawer-overlay" id="tra-overlay" onclick="toggleTraModal(false)">
+  <div class="modal-center" onclick="event.stopPropagation()" style="max-width: 420px; text-align: left;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+      <h3 style="margin:0; letter-spacing:1px; color: var(--accent);">Confirmar Transferencia</h3>
+      <button onclick="toggleTraModal(false)" style="background:none; border:none; color:white; cursor:pointer;">
+        <i data-lucide="x"></i>
+      </button>
+    </div>
+    
+    <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px; line-height: 1.4;">
+      Por favor transfiera al siguiente número de tarjeta y suba la captura del SMS de la transacción.
+    </p>
+    
+    <!-- Cuenta de Transferencia (Misma del Café) -->
+    <div class="card-copy-box">
+      <span class="card-number">9204-1299-7869-4034</span>
+      <button class="copy-btn" onclick="copyToClipboard('9204-1299-7869-4034')">
+        <i data-lucide="copy" style="width: 16px; height: 16px;"></i>
+      </button>
+    </div>
+    
+    <!-- Resumen -->
+    <div style="background: var(--primary); border-radius: 8px; padding: 12px; margin: 15px 0;">
+      <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+        <span style="color: var(--text-muted);">Productos:</span>
+        <span id="tra-summary-items" style="font-weight: 600;">0</span>
+      </div>
+      <div style="display: flex; justify-content: space-between;">
+        <span style="color: var(--text-muted);">Total:</span>
+        <span id="tra-summary-total" style="color: var(--accent); font-weight: 700;">$0</span>
+      </div>
+    </div>
+    
+    <!-- Input de imagen -->
+    <div style="margin: 20px 0;">
+      <input type="file" id="tra-receipt-file" accept="image/png, image/jpeg, .png, .jpg, .jpeg" 
+             style="display: none;" onchange="handleTraReceiptFileInput(event)">
+      
+      <button id="tra-select-btn" class="btn-action" style="width: 100%;" onclick="document.getElementById('tra-receipt-file').click()">
+        <i data-lucide="upload"></i> SELECCIONAR COMPROBANTE
+      </button>
+      
+      <div id="tra-preview-container" style="display: none; margin-top: 15px;">
+        <div style="position: relative;">
+          <img id="tra-preview" style="width: 100%; border-radius: 8px; border: 1px solid var(--border);">
+          <button style="position: absolute; top: 10px; right: 10px; background: var(--error); color: white; border: none; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer;"
+                  onclick="removeTraReceiptPreview()">
+            <i data-lucide="x" style="width: 16px;"></i>
+          </button>
+        </div>
+      </div>
+      
+      <div id="tra-upload-progress" style="display: none; text-align: center; margin: 15px 0;">
+        <div class="scroll-loader" style="margin: 0 auto;"></div>
+        <p style="color: var(--accent); font-size: 0.85rem; margin-top: 8px;">Subiendo comprobante...</p>
+      </div>
+      <p id="tra-file-error" style="color: var(--error); font-size: 0.8rem; margin-top: 5px; display: none;"></p>
+    </div>
+    
+    <div style="display: flex; gap: 10px; margin-top: 20px;">
+      <button class="btn-action" style="flex: 1; background: transparent; border: 1px solid var(--border); color: var(--text-main);" 
+              onclick="toggleTraModal(false)">CANCELAR</button>
+      <button class="btn-action" style="flex: 1;" id="confirm-tra-btn" disabled onclick="confirmTraPayment()">
+        <i data-lucide="check-circle"></i> ENVIAR PAGO
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL MLC -->
+<div class="drawer-overlay" id="mlc-overlay" onclick="toggleMlcModal(false)">
+  <div class="modal-center" onclick="event.stopPropagation()">
+    
+    <!-- Encabezado -->
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+      <h3 style="margin:0; letter-spacing:1px; color: var(--accent); font-size: 1.1rem;">Confirmar Pago MLC</h3>
+      <button onclick="toggleMlcModal(false)" style="background:none; border:none; color:var(--text-muted); cursor:pointer;">
+        <i data-lucide="x"></i>
+      </button>
+    </div>
+    
+    <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 20px; line-height: 1.4;">
+      Por favor transfiera a la tarjeta <b>MLC</b> y suba la captura de pantalla del comprobante.
+    </p>
+    
+    <!-- Tarjeta Copiable -->
+    <div class="card-copy-box">
+      <span class="card-number" id="mlc-card-val">9225 0000 0000 0000</span>
+      <button class="copy-btn" onclick="copyToClipboard('9225 0000 0000 0000')">
+        <i data-lucide="copy" style="width: 16px; height: 16px;"></i>
+      </button>
+    </div>
+    
+    <!-- Resumen Dinámico -->
+    <div style="background: var(--primary); border-radius: 10px; padding: 15px; margin: 15px 0; border: 1px solid var(--border);">
+      <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.85rem;">
+        <span style="color: var(--text-muted);">Productos:</span>
+        <span id="mlc-summary-items" style="font-weight: 600;">0</span>
+      </div>
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <span style="color: var(--text-muted); font-size: 0.85rem;">Total MLC:</span>
+        <span id="mlc-summary-total" style="color: var(--accent); font-weight: 800; font-size: 1.2rem;">0.00</span>
+      </div>
+    </div>
+    
+    <!-- Area de Carga de Imagen -->
+    <div style="margin: 10px 0;">
+      <input type="file" id="mlc-receipt-file" accept="image/*" style="display: none;" onchange="handleMlcReceiptFileInput(event)">
+      
+      <button id="mlc-select-btn" class="btn-action" style="width: 100%; height: 50px;" onclick="document.getElementById('mlc-receipt-file').click()">
+        <i data-lucide="camera"></i> SUBIR COMPROBANTE
+      </button>
+      
+      <!-- Vista previa con botón de borrar -->
+      <div id="mlc-preview-container" style="display: none; margin-top: 15px; position: relative;">
+        <img id="mlc-preview" style="width: 100%; border-radius: 10px; border: 1px solid var(--accent); display: block;">
+        <button id="remove-mlc-receipt" 
+                onclick="removeMlcReceiptPreview()"
+                style="position: absolute; top: -10px; right: -10px; background: var(--error); color: white; border: none; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
+          <i data-lucide="trash-2" style="width: 16px;"></i>
+        </button>
+      </div>
+      
+      <!-- Loader de subida -->
+      <div id="mlc-upload-progress" style="display: none; text-align: center; margin: 15px 0;">
+        <div class="scroll-loader" style="margin: 0 auto;"></div>
+        <p style="color: var(--accent); font-size: 0.8rem; margin-top: 8px; font-weight: 600;">Procesando envío...</p>
+      </div>
+    </div>
+    
+    <!-- Botones de Acción -->
+    <div style="display: flex; gap: 10px; margin-top: 20px;">
+      <button class="btn-action" style="flex: 1; background: #27272a; color: white;" onclick="toggleMlcModal(false)">CANCELAR</button>
+      <button class="btn-action" style="flex: 1.5;" id="confirm-mlc-btn" disabled onclick="confirmMlcPayment()">
+        <i data-lucide="send"></i> ENVIAR PAGO
+      </button>
+    </div>
+
+  </div>
+</div>
+
+  <!-- CARRITO -->
+  <div class="drawer-overlay" id="cart-overlay" onclick="toggleCart(false)">
+    <div class="drawer" onclick="event.stopPropagation()">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;">
+        <h3 style="margin:0; letter-spacing:1px;">Mi Pedido</h3>
+        <button onclick="toggleCart(false)" style="background:none; border:none; color:white;"><i data-lucide="x"></i></button>
+      </div>
+      <div id="cart-list" style="flex:1; overflow-y:auto;"></div>
+      <div style="border-top: 1px solid var(--border); padding-top:20px;">
+        <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
+          <span style="color:var(--text-muted)">TOTAL</span>
+          <span id="cart-total" style="color:var(--accent); font-size:1.5rem; font-weight:800;">$0</span>
+        </div>
+        <div class="cart-form" id="order-form">
+          <input type="text" id="order-name" placeholder="Nombre completo">
+          <input type="text" id="order-address" placeholder="Dirección exacta">          
+          <input type="text" id="order-reference" placeholder="Referencia (Ej: Casa de rejas verdes, apto...)">
+          <input type="tel" id="order-phone" placeholder="Teléfono (Ej: 5 o 6 /1234567)" maxlength="8">
+        </div>
+        <button class="btn-whatsapp" onclick="sendOrder()">
+          <i data-lucide="send"></i> ENVIAR PEDIDO POR WHATSAPP
+        </button>
+      </div>
+    </div>
+  </div>
+  <div id="toast-root"></div>
+  <script type="module" src="/js/index.js"></script>
+</body>
+</html>

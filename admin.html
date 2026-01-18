@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Dashboard - Pro Store</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Google Fonts: Inter para un look moderno -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" type="text/css" href="/css/admin.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Admin Dashboard</h1>
+      <p style="color: var(--text-muted); margin-top: 10px;">Gestión de tienda, monedas y productos</p>
+    </header>
+
+    <div class="dashboard-grid">
+      <div class="stat-card" onclick="openModal('modal-payments')">
+        <span class="icon">💳</span>
+        <h3>Monedas y Tasas</h3>
+        <p style="color: var(--text-muted); font-size: 0.8rem; margin-top: 8px;">Configura métodos de pago</p>
+      </div>
+
+      <div class="stat-card" onclick="openModal('modal-store')">
+        <span class="icon">🏪</span>
+        <h3>Mi Tienda</h3>
+        <p style="color: var(--text-muted); font-size: 0.8rem; margin-top: 8px;">Categorías y Productos</p>
+      </div>
+
+      <div class="stat-card" onclick="openModal('modal-orders')">
+        <span class="icon">📊</span>
+        <h3>Reporte de Ventas</h3>
+        <p style="color: var(--text-muted); font-size: 0.8rem; margin-top: 8px;">Análisis de pedidos</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL MÉTODOS DE PAGO -->
+  <div id="modal-payments" class="modal-overlay">
+    <div class="modal-content">
+      <div style="display: flex; justify-content: space-between; margin-bottom: 30px;">
+        <h2>💳 Pagos y Tasas</h2>
+        <button class="btn btn-delete" style="padding: 5px 15px;" onclick="closeModal('modal-payments')">Cerrar</button>
+      </div>
+      
+      <div class="form-row">
+        <div class="form-field">
+          <label>Nombre del Método</label>
+          <input id="pay-name" placeholder="Ej: Zelle / Pago Móvil">
+        </div>
+        <div class="form-field">
+          <label>Cálculo</label>
+          <select id="pay-mode">
+            <option value="none">Precio Base</option>
+            <option value="percent">Porcentaje (+ %)</option>
+            <option value="divide">Tasa Cambio (/)</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label>Valor</label>
+          <input id="pay-value" type="number" step="0.01" value="0">
+        </div>
+        <button class="btn btn-add" style="height: 48px; align-self: flex-end;" onclick="handleAddPayment()">➕ Añadir</button>
+      </div>
+      <ul id="payments-list"></ul>
+    </div>
+  </div>
+
+  <!-- MODAL TIENDA -->
+  <div id="modal-store" class="modal-overlay">
+    <div class="modal-content">
+      <div style="display: flex; justify-content: space-between; margin-bottom: 30px;">
+        <h2 id="store-title">🏪 Mi Inventario</h2>
+        <button class="btn btn-delete" style="padding: 5px 15px;" onclick="closeModal('modal-store')">Cerrar</button>
+      </div>
+
+      <div id="section-categories">
+        <div class="form-row">
+          <div class="form-field">
+            <label>Nueva Categoría</label>
+            <input id="new-cat-name" placeholder="Ej: Pizzas / Bebidas">
+          </div>
+          <div class="form-field">
+            <label>Portada (Imagen)</label>
+            <input type="file" id="new-cat-img" accept="image/*" style="font-size: 10px;">
+          </div>
+          <button class="btn btn-add" style="height: 48px; align-self: flex-end;" onclick="handleAddCategory()">➕ Crear</button>
+        </div>
+        <ul id="categories-list"></ul>
+      </div>
+
+      <div id="section-products" class="hidden">
+        <button class="btn" style="background: rgba(255,255,255,0.1); color: white; margin-bottom: 20px;" onclick="showMainPanel()">⬅ Volver</button>
+        <h3 id="current-cat-title" style="margin-bottom: 20px;"></h3>
+        <div class="form-row">
+          <div class="form-field">
+            <label>Producto</label>
+            <input id="new-prod-name" placeholder="Nombre">
+          </div>
+          <div class="form-field">
+            <label>Precio $</label>
+            <input id="new-prod-price" type="number" step="0.01">
+          </div>
+          <div class="form-field">
+            <label>Foto</label>
+            <input type="file" id="new-prod-img" accept="image/*" style="font-size: 10px;">
+          </div>
+          <button class="btn btn-add" style="height: 48px; align-self: flex-end;" onclick="handleAddProduct()">➕ Añadir</button>
+        </div>
+        <ul id="products-list"></ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL REPORTES -->
+<div id="modal-orders" class="modal-overlay">
+  <div class="modal-content" style="max-width: 1000px;">
+    <div style="display: flex; justify-content: space-between; margin-bottom: 30px; align-items: center; border-bottom: 1px solid var(--glass-border); padding-bottom: 20px;">
+      <div>
+        <h2 style="margin:0;">📊 Reporte Histórico</h2>
+        <p style="color: var(--text-muted); font-size: 0.8rem; margin-top: 4px;">Análisis de ingresos por método de pago</p>
+      </div>
+      
+      <div class="modal-header-actions">
+        <button class="btn-danger-glass" onclick="handleClearAllOrders()">
+          <span style="font-size: 1.1rem;">🗑️</span> Vaciar Historial
+        </button>
+        <button class="btn" style="background: rgba(255,255,255,0.05); color: white; border: 1px solid var(--glass-border);" onclick="closeModal('modal-orders')">
+          Cerrar
+        </button>
+      </div>
+    </div>
+    
+    <!-- Stats Grid Rediseñado -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 30px;">
+      <div class="stat-card" style="padding: 20px; background: rgba(99, 102, 241, 0.1); border-color: var(--primary);">
+        <small style="color: var(--text-muted); display: block; margin-bottom: 5px;">Total General ($)</small>
+        <div id="total-revenue" style="font-size: 1.8rem; font-weight: 800; color: #fff;">$0.00</div>
+      </div>
+      
+      <div class="stat-card" style="padding: 20px; border-color: #818cf8;">
+        <small style="color: var(--text-muted); display: block; margin-bottom: 5px;">Transferencia/PM</small>
+        <div id="total-tra" style="font-size: 1.5rem; font-weight: 800; color: #818cf8;">$0.00</div>
+      </div>
+
+      <div class="stat-card" style="padding: 20px; border-color: #a78bfa;">
+        <small style="color: var(--text-muted); display: block; margin-bottom: 5px;">Zelle</small>
+        <div id="total-zelle" style="font-size: 1.5rem; font-weight: 800; color: #a78bfa;">$0.00</div>
+      </div>
+
+      <div class="stat-card" style="padding: 20px; border-color: #fbbf24;">
+        <small style="color: var(--text-muted); display: block; margin-bottom: 5px;">Efectivo USD</small>
+        <div id="total-usd" style="font-size: 1.5rem; font-weight: 800; color: #fbbf24;">$0.00</div>
+      </div>
+
+      <div class="stat-card" style="padding: 20px;">
+        <small style="color: var(--text-muted); display: block; margin-bottom: 5px;">Cant. Pedidos</small>
+        <div id="total-orders-count" style="font-size: 1.5rem; font-weight: 800;">0</div>
+      </div>
+    </div>
+
+    <!-- LISTA DE PEDIDOS (Indispensable para que el script no falle) -->
+    <h3 style="margin-bottom: 15px; font-size: 1rem;">Detalle de Ventas por transferencia</h3>
+    <div id="orders-detailed-list" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px; max-height: 400px; overflow-y: auto; padding-right: 10px;">
+        <!-- Se llena con JS -->
+    </div>
+  </div>
+</div>
+
+</div>
+
+  <div id="toast-container"></div>
+
+  <!-- MODAL CONFIRMACIÓN -->
+  <div id="modal-confirm" class="modal-overlay">
+    <div class="modal-content" style="max-width: 400px; text-align: center;">
+      <h3 id="modal-title">¿Confirmar acción?</h3>
+      <p id="modal-text" style="color: var(--text-muted); margin: 15px 0 25px;">Esta acción no se puede revertir.</p>
+      <div style="display: flex; gap: 10px; justify-content: center;">
+        <button class="btn" style="background: rgba(255,255,255,0.1); color: white;" onclick="closeConfirm(false)">Cancelar</button>
+        <button class="btn btn-delete" onclick="closeConfirm(true)">Si, eliminar</button>
+      </div>
+    </div>
+  </div>
+
+<!-- MODAL EDITAR PRODUCTO -->
+<div id="modal-edit-product" class="modal-overlay">
+  <div class="modal-content" style="max-width: 500px;">
+    <div style="display: flex; justify-content: space-between; margin-bottom: 25px;">
+      <h2>✏️ Editar Producto</h2>
+      <button class="btn btn-delete" style="padding: 5px 15px;" onclick="closeModal('modal-edit-product')">Cerrar</button>
+    </div>
+    
+    <div class="form-field" style="margin-bottom: 15px;">
+      <label>Nombre del Producto</label>
+      <input id="edit-prod-name">
+    </div>
+    <div class="form-field" style="margin-bottom: 15px;">
+      <label>Precio $</label>
+      <input id="edit-prod-price" type="number" step="0.01">
+    </div>
+    <div class="form-field" style="margin-bottom: 25px;">
+      <label>Nueva Imagen (Opcional)</label>
+      <input type="file" id="edit-prod-img" accept="image/*" style="font-size: 10px;">
+    </div>
+    
+    <input type="hidden" id="edit-prod-id">
+    
+    <button class="btn btn-add" style="width: 100%;" onclick="handleUpdateProduct()">💾 Guardar Cambios</button>
+  </div>
+</div>
+
+<!-- MODAL EDITAR MÉTODO DE PAGO -->
+<div id="modal-edit-payment" class="modal-overlay">
+  <div class="modal-content" style="max-width: 500px;">
+    <div style="display: flex; justify-content: space-between; margin-bottom: 25px;">
+      <h2>✏️ Editar Moneda / Tasa</h2>
+      <button class="btn btn-delete" style="padding: 5px 15px;" onclick="closeModal('modal-edit-payment')">Cerrar</button>
+    </div>
+    
+    <div class="form-field" style="margin-bottom: 15px;">
+      <label>Nombre del Método</label>
+      <input id="edit-pay-name">
+    </div>
+    <div class="form-field" style="margin-bottom: 15px;">
+      <label>Cálculo</label>
+      <select id="edit-pay-mode">
+        <option value="none">Precio Base</option>
+        <option value="percent">Porcentaje (+ %)</option>
+        <option value="divide">Tasa Cambio (/)</option>
+      </select>
+    </div>
+    <div class="form-field" style="margin-bottom: 25px;">
+      <label>Valor</label>
+      <input id="edit-pay-value" type="number" step="0.01">
+    </div>
+    
+    <input type="hidden" id="edit-pay-id">
+    
+    <button class="btn btn-add" style="width: 100%;" onclick="handleUpdatePayment()">💾 Guardar Cambios</button>
+  </div>
+</div>
+
+  <script type="module" src="/js/admin.js"></script>
+</body>
+</html>
