@@ -42,25 +42,30 @@
         <button class="btn btn-delete" style="padding: 10px 20px;" onclick="handleLogout()">Cerrar Sesión 🚪</button>
       </header>
 
-      <div class="dashboard-grid">
-        <div class="stat-card" onclick="openModal('modal-payments')">
-          <span class="icon">💳</span>
-          <h3>Monedas y Tasas</h3>
-          <p style="color: var(--text-muted); font-size: 0.8rem; margin-top: 8px;">Configura métodos de pago</p>
-        </div>
+<div class="dashboard-grid">
+    <!-- Visible para todos -->
+    <div id="card-payments" class="stat-card" onclick="openModal('modal-payments')">
+      <span class="icon">💳</span>
+      <h3>Monedas y Tasas</h3>
+      <p style="color: var(--text-muted); font-size: 0.8rem; margin-top: 8px;">Configura métodos de pago</p>
+    </div>
 
-        <div class="stat-card" onclick="openModal('modal-store')">
-          <span class="icon">🏪</span>
-          <h3>Mi Tienda</h3>
-          <p style="color: var(--text-muted); font-size: 0.8rem; margin-top: 8px;">Categorías y Productos</p>
-        </div>
+    <!-- Visible para todos -->
+    <div id="card-store" class="stat-card" onclick="openModal('modal-store')">
+      <span class="icon">🏪</span>
+      <h3>Mi Tienda</h3>
+      <p style="color: var(--text-muted); font-size: 0.8rem; margin-top: 8px;">Categorías y Productos</p>
+    </div>
 
-        <div class="stat-card" onclick="openModal('modal-orders')">
-          <span class="icon">📊</span>
-          <h3>Reporte de Ventas</h3>
-          <p style="color: var(--text-muted); font-size: 0.8rem; margin-top: 8px;">Análisis de pedidos</p>
-        </div>
-      </div>
+    <!-- SOLO ADMIN -->
+    <div id="card-reports" class="stat-card" onclick="openModal('modal-orders')">
+      <span class="icon">📊</span>
+      <h3>Reporte de Ventas</h3>
+      <p style="color: var(--text-muted); font-size: 0.8rem; margin-top: 8px;">Análisis de pedidos</p>
+    </div>
+</div>
+</div>
+
     </div>
   </div>
   
