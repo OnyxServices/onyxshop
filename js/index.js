@@ -854,7 +854,7 @@ window.confirmZellePayment = async () => {
 
     // Redirigir a WhatsApp
     setTimeout(() => {
-      window.location.href = `https://wa.me/+5356947641?text=${text}`;
+      window.location.href = `https://wa.me/+5353910527?text=${text}`;
     }, 100);
 
     // 7. Limpieza total y cierre
@@ -961,7 +961,7 @@ window.confirmMlcPayment = async () => {
       `💰 *TOTAL:* ${finalTotal.text}`
     );
 
-    setTimeout(() => { window.location.href = `https://wa.me/+5356947641?text=${text}`; }, 100);
+    setTimeout(() => { window.location.href = `https://wa.me/+5353910527?text=${text}`; }, 100);
 
     // Limpieza total
     cart = [];
@@ -1079,7 +1079,7 @@ window.confirmTraPayment = async () => {
 
     // 7. Redirección a WhatsApp
     setTimeout(() => {
-      window.location.href = `https://wa.me/+5356947641?text=${text}`;
+      window.location.href = `https://wa.me/+5353910527?text=${text}`;
     }, 100);
 
     // Limpiar carrito y cerrar modales
@@ -1178,7 +1178,7 @@ window.sendOrder = async () => {
         );
 
         // Abrir WhatsApp
-        window.open(`https://wa.me/+5356947641?text=${text}`, '_blank');
+        window.open(`https://wa.me/+5353910527?text=${text}`, '_blank');
         
         // Limpieza de interfaz
         cart = [];
