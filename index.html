@@ -168,12 +168,14 @@
     
     <!-- Input de imagen -->
     <div style="margin: 20px 0;">
-      <input type="file" id="receipt-file" accept="image/png, image/jpeg, .png, .jpg, .jpeg" 
-             style="display: none;" onchange="handleReceiptFileInput(event)">
-      
-      <button id="select-receipt-btn" class="btn-action" style="width: 100%;" onclick="document.getElementById('receipt-file').click()">
-        <i data-lucide="upload"></i> SELECCIONAR IMAGEN
-      </button>
+      <input type="file" id="zelle-receipt-file" accept="image/*" 
+       style="display: none;" onchange="handleReceiptInput('zelle', event)">
+
+<!-- El botón que dispara el input también debe cambiar su ID de referencia -->
+<button id="select-receipt-btn" class="btn-action" style="width: 100%;" 
+        onclick="document.getElementById('zelle-receipt-file').click()">
+    <i data-lucide="upload"></i> SELECCIONAR IMAGEN
+</button>
       
       <div id="receipt-preview-container" style="display: none; margin-top: 15px;">
         <div style="position: relative;">
@@ -201,9 +203,10 @@
               onclick="toggleZelleModal(false)" id="cancel-zelle-btn">
         CANCELAR
       </button>
-      <button class="btn-action" style="flex: 1;" id="confirm-zelle-btn" disabled onclick="confirmZellePayment()">
-        <i data-lucide="check-circle"></i> CONFIRMAR PAGO
-      </button>
+      <button class="btn-action" style="flex: 1;" id="confirm-zelle-btn" disabled 
+        onclick="confirmReceiptPayment('zelle')">
+    <i data-lucide="check-circle"></i> CONFIRMAR PAGO
+</button>
     </div>
   </div>
 </div>
@@ -253,8 +256,8 @@
     </div>
     
     <div style="margin: 20px 0;">
-      <input type="file" id="tra-receipt-file" accept="image/png, image/jpeg, .png, .jpg, .jpeg" 
-             style="display: none;" onchange="handleTraReceiptFileInput(event)">
+      <input type="file" id="tra-receipt-file" accept="image/*" 
+       style="display: none;" onchange="handleReceiptInput('tra', event)">
 
         <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 8px; position: center;">
           Suba una captura del SMS de la transferencia
@@ -284,9 +287,10 @@
     <div style="display: flex; gap: 10px; margin-top: 20px;">
       <button class="btn-action" style="flex: 1; background: transparent; border: 1px solid var(--border); color: var(--text-main);" 
               onclick="toggleTraModal(false)">CANCELAR</button>
-      <button class="btn-action" style="flex: 1;" id="confirm-tra-btn" disabled onclick="confirmTraPayment()">
-        <i data-lucide="check-circle"></i> ENVIAR PAGO
-      </button>
+      <button class="btn-action" style="flex: 1;" id="confirm-tra-btn" disabled 
+        onclick="confirmReceiptPayment('tra')">
+    <i data-lucide="check-circle"></i> ENVIAR PAGO
+</button>
     </div>
   </div>
 </div>

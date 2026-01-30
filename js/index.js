@@ -92,6 +92,28 @@ function notifyNewProduct(categoryName) {
   }, 8000);
 }
 
+function showToast(message) {
+  // Intentar usar toast-root si existe, si no, al body
+  const container = document.getElementById('toast-root') || document.body;
+  const toast = document.createElement('div');
+  toast.className = 'toast-message'; 
+  toast.innerHTML = message;
+  container.appendChild(toast);
+  
+  setTimeout(() => toast.classList.add('show'), 100);
+  setTimeout(() => {
+    toast.classList.remove('show');
+    setTimeout(() => toast.remove(), 500);
+  }, 3000);
+}
+
+/**
+ * Muestra un error visual
+ */
+function showTopError(message) {
+  showToast(`❌ ${message}`);
+}
+
 // ==========================================
 // 3. GESTIÓN DE DATOS (API & SYNC)
 // ==========================================
@@ -437,12 +459,13 @@ window.sendOrder = async () => {
 };
 
 async function processStandardOrder(form) {
-  showToast("Procesando pedido...");
+  showToast("⏳ Procesando pedido...");
   const stockOk = await validateAndSubtractStock();
   if (!stockOk) return showTopError("Se agotó el stock de un producto");
 
   const orderId = `CS-EF-${Date.now().toString().slice(-6)}`;
-  const totalObj = getCalculatedPrice(AppState.cart.reduce((acc, i) => acc + (i.price * i.qty), 0));
+  const totalBase = AppState.cart.reduce((acc, i) => acc + (i.price * i.qty), 0);
+  const totalObj = getCalculatedPrice(totalBase);
 
   try {
     await createOrderInSupabase({
@@ -457,11 +480,15 @@ async function processStandardOrder(form) {
       status: 'completed'
     });
 
-    const waText = formatWhatsAppMessage(orderId, form, totalObj.text);
-    window.open(`https://wa.me/+5353910527?text=${encodeURIComponent(waText)}`, '_blank');
+    // Pasamos el objeto del formulario y el nombre del método de pago
+    const waText = formatWhatsAppMessage(orderId, form, totalObj.text, totalObj.methodName);
+    const waUrl = `https://wa.me/+5353910527?text=${encodeURIComponent(waText)}`;
     
+    window.open(waUrl, '_blank');
     finalizeOrder();
+
   } catch (e) {
+    console.error(e);
     showTopError("Error al registrar pedido");
   }
 }
@@ -506,13 +533,25 @@ window.handleReceiptInput = (type, event) => {
 /**
  * Confirmación genérica para pagos con comprobante.
  */
+window.toggleZelleModal = (open) => open ? openPaymentModal('zelle') : closeModal('zelle-overlay');
+window.toggleTraModal = (open) => open ? openPaymentModal('tra') : closeModal('tra-overlay');
+window.toggleMlcModal = (open) => open ? openPaymentModal('mlc') : closeModal('mlc-overlay');
+window.toggleCoffeeModal = (open) => open ? document.getElementById('coffee-overlay').classList.add('active') : closeModal('coffee-overlay');
+
 window.confirmReceiptPayment = async (type) => {
   const file = AppState.files[type];
   const btn = document.getElementById(`confirm-${type}-btn`);
   const loader = document.getElementById(`${type}-upload-progress`);
 
+  const form = {
+    name: document.getElementById('order-name'),
+    phone: document.getElementById('order-phone'),
+    address: document.getElementById('order-address'),
+    ref: document.getElementById('order-reference')
+  };
+
   btn.disabled = true;
-  loader.style.display = 'block';
+  if(loader) loader.style.display = 'block';
 
   try {
     const stockOk = await validateAndSubtractStock();
@@ -521,15 +560,15 @@ window.confirmReceiptPayment = async (type) => {
     const orderId = `CS-${type.toUpperCase()}-${Date.now().toString().slice(-6)}`;
     const uploadedUrl = await uploadReceiptToSupabase(file, orderId);
     
-    const name = document.getElementById('order-name').value;
-    const phone = document.getElementById('order-phone').value;
-    const totalObj = getCalculatedPrice(AppState.cart.reduce((acc, i) => acc + (i.price * i.qty), 0));
+    const totalBase = AppState.cart.reduce((acc, i) => acc + (i.price * i.qty), 0);
+    const totalObj = getCalculatedPrice(totalBase);
 
     await createOrderInSupabase({
       order_id: orderId,
-      customer_name: name,
-      phone: phone,
-      address: document.getElementById('order-address').value,
+      customer_name: form.name.value,
+      phone: form.phone.value,
+      address: form.address.value,
+      reference: form.ref.value,
       items: AppState.cart,
       total_text: totalObj.text,
       payment_method: type.toUpperCase(),
@@ -537,15 +576,17 @@ window.confirmReceiptPayment = async (type) => {
       status: 'pending'
     });
 
-    const waText = `👑 PAGO ${type.toUpperCase()}\nOrden: #${orderId}\nCliente: ${name}\nTotal: ${totalObj.text}\nComprobante: ${uploadedUrl}`;
+    const bodyText = formatWhatsAppMessage(orderId, form, totalObj.text, type.toUpperCase());
+    const waText = `🖼️ *PAGO CON COMPROBANTE*\n\n${bodyText}\n\n🔗 *Recibo:* ${uploadedUrl}`;
+    
     window.location.href = `https://wa.me/+5353910527?text=${encodeURIComponent(waText)}`;
 
     finalizeOrder();
-    document.getElementById(`${type}-overlay`).classList.remove('active');
+    closeModal(`${type}-overlay`);
   } catch (e) {
     showTopError(e.message);
     btn.disabled = false;
-    loader.style.display = 'none';
+    if(loader) loader.style.display = 'none';
   }
 };
 
@@ -587,9 +628,33 @@ function finalizeOrder() {
   showToast("¡Pedido procesado con éxito!");
 }
 
-function formatWhatsAppMessage(orderId, form, totalText) {
-  const items = AppState.cart.map(i => `• ${i.qty}x ${i.name}`).join('\n');
-  return `👑 *NUEVO PEDIDO*\n#${orderId}\n\n👤 *Cliente:* ${form.name.value}\n📍 *Dir:* ${form.address.value}\n📞 *Tel:* +53${form.phone.value}\n\n🛍️ *Productos:*\n${items}\n\n💰 *Total:* ${totalText}`;
+function formatWhatsAppMessage(orderId, form, totalText, paymentMethod = "Efectivo") {
+  const items = AppState.cart.map(i => `┃ 📦 *${i.qty}x* ${i.name}`).join('\n');
+  const date = new Date().toLocaleDateString();
+
+  return `✨ *NUEVA ORDEN - ONYX SHOP* ✨
+┏━━━━━━━━━━━━━━━━━━━━━┓
+┃ 🆔 *ID:* #${orderId}
+┃ 📅 *FECHA:* ${date}
+┃ 💳 *PAGO:* ${paymentMethod}
+┗━━━━━━━━━━━━━━━━━━━━━┛
+
+👤 *DATOS DEL CLIENTE*
+┃ *Nombre:* ${form.name.value.trim()}
+┃ *Teléfono:* +53 ${form.phone.value.trim()}
+
+📍 *ENTREGA*
+┃ *Dirección:* ${form.address.value.trim()}
+┃ *Referencia:* ${form.ref.value.trim() || 'No especificada'}
+
+🛍️ *PRODUCTOS SELECCIONADOS*
+${items}
+
+──────────────────────
+💰 *TOTAL A PAGAR:* *${totalText}*
+──────────────────────
+
+🚀 _Por favor, confirme que ha recibido este pedido para comenzar a procesarlo._`;
 }
 
 // Globales para HTML

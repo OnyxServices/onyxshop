@@ -1018,3 +1018,27 @@
 .cart-bounce-active {
   animation: cart-bounce 0.4s ease;
 }
+
+/* Estilo para las notificaciones Toast */
+.toast-message {
+    position: fixed;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: #18181b;
+    color: #ffffff;
+    padding: 12px 24px;
+    border-radius: 50px;
+    font-size: 0.9rem;
+    z-index: 10000;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    border: 1px solid #eab308; /* Color acento */
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    white-space: nowrap;
+    opacity: 0;
+}
+
+.toast-message.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+}
