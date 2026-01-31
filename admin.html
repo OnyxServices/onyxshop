@@ -160,6 +160,12 @@
       <div id="section-products" class="hidden">
         <button class="btn" style="background: rgba(255,255,255,0.1); color: white; margin-bottom: 20px;" onclick="showMainPanel()">⬅ Volver</button>
         <h3 id="current-cat-title" style="margin-bottom: 20px;"></h3>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h3 id="current-cat-title" style="margin: 0;"></h3>
+        <button class="btn btn-edit" style="padding: 8px 15px; font-size: 0.8rem;" onclick="openModal('modal-mass-prices')">
+        ⚡ Ajuste Masivo
+    </button>
+</div>
 
         <div class="form-row">
           <div class="form-field"><label>Producto</label><input id="new-prod-name"></div>
@@ -345,11 +351,50 @@
     </div>
   </div>
 
+  <!-- Modal: Ajuste Masivo de Precios -->
+<div id="modal-mass-prices" class="modal-overlay">
+  <div class="modal-content" style="max-width: 450px;">
+    <div style="display: flex; justify-content: space-between; margin-bottom: 25px;">
+      <h2>📈 Ajuste Masivo</h2>
+      <button class="btn btn-delete" onclick="closeModal('modal-mass-prices')">Cerrar</button>
+    </div>
+
+    <p style="color: var(--text-muted); margin-bottom: 20px; font-size: 0.9rem;">
+      Esta acción modificará los precios de <strong>todos</strong> los productos en la categoría actual.
+    </p>
+
+    <div class="form-field">
+      <label>Tipo de Ajuste</label>
+      <select id="mass-adj-type">
+        <option value="increase">Aumentar Precio (+)</option>
+        <option value="decrease">Disminuir Precio (-)</option>
+      </select>
+    </div>
+
+    <div class="form-field">
+      <label>Porcentaje (%)</label>
+      <input id="mass-adj-percent" type="number" step="0.1" placeholder="Ej: 10">
+    </div>
+
+    <div style="background: rgba(212, 175, 55, 0.1); padding: 15px; border-radius: 12px; border: 1px solid var(--accent); margin-top: 20px;">
+        <p style="font-size: 0.8rem; color: var(--accent);"><strong>Nota:</strong> Los precios se redondearán a 2 decimales automáticamente.</p>
+    </div>
+
+    <button class="btn btn-add" style="width: 100%; margin-top: 25px; height: 50px;" onclick="handleApplyMassPriceUpdate()">
+      Aplicar Cambio Masivo
+    </button>
+  </div>
+</div>
+
   <!-- Contenedor de Notificaciones Toast -->
   <div id="toast-container"></div>
 
+  
+  <!-- Cargar Tesseract.js desde CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+
   <!-- Scripts -->
-  <script type="module" src="./js/admin.js"></script>
+<script type="module" src="./js/admin.js"></script>
 </body>
 
 </html>

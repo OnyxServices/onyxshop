@@ -588,6 +588,16 @@
   border-bottom: 1px solid var(--border);
 }
 
+/* --- AGREGAR ESTO PARA CORREGIR LA IMAGEN DEL CARRITO --- */
+.cart-item .cart-img {
+  width: 70px;
+  height: 70px;
+  object-fit: cover;         /* Recorta la imagen sin deformarla */
+  border-radius: var(--radius-sm); /* Bordes redondeados (8px) */
+  flex-shrink: 0;            /* Evita que la imagen se aplaste si hay mucho texto */
+  border: 1px solid var(--border); /* Borde sutil para separar del fondo */
+}
+
 .qty-controls {
   display: flex;
   align-items: center;

@@ -176,19 +176,18 @@
         onclick="document.getElementById('zelle-receipt-file').click()">
     <i data-lucide="upload"></i> SELECCIONAR IMAGEN
 </button>
-      
-      <div id="receipt-preview-container" style="display: none; margin-top: 15px;">
-        <div style="position: relative;">
-          <img id="receipt-preview" style="width: 100%; border-radius: 8px; border: 1px solid var(--border);">
-          <button id="remove-receipt" 
-        style="position: absolute; top: 10px; right: 10px; background: var(--error); color: white; border: none; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer;"
-        onclick="removeReceiptPreview()">
-  <i data-lucide="x" style="width: 16px;"></i>
-</button>
-        </div>
-        <p id="file-info" style="color: var(--text-muted); font-size: 0.8rem; margin-top: 5px; text-align: center;"></p>
-      </div>
-      
+      <!-- ESTO ES LO QUE DEBES PEGAR -->
+<div id="zelle-preview-container" style="display: none; margin-top: 15px;">
+  <div style="position: relative;">
+    <img id="zelle-preview" style="width: 100%; border-radius: 8px; border: 1px solid var(--border);">
+    
+    <button id="remove-receipt" 
+      style="position: absolute; top: 10px; right: 10px; background: var(--error); color: white; border: none; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer;"
+      onclick="removeReceiptPreview()">
+      <i data-lucide="x" style="width: 16px;"></i>
+    </button>
+  </div>
+</div>      
       <div id="upload-progress" style="display: none; text-align: center; margin: 15px 0;">
         <div class="scroll-loader" style="margin: 0 auto;"></div>
         <p style="color: var(--accent); font-size: 0.85rem; margin-top: 8px;">Subiendo comprobante...</p>

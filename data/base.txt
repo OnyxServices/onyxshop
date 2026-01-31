@@ -46,7 +46,7 @@ CREATE TABLE public.products (
   category_id uuid,
   name text NOT NULL,
   price numeric NOT NULL DEFAULT 0,
-  image_url text,
+  image_url text DEFAULT 'https://picsum.photos/300'::text,
   active boolean DEFAULT true,
   created_at timestamp with time zone DEFAULT now(),
   stock integer DEFAULT 0,

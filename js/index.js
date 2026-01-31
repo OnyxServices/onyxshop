@@ -432,30 +432,62 @@ async function validateAndSubtractStock() {
 /**
  * Función central de envío de orden.
  */
+/**
+ * Función central de envío de orden corregida.
+ */
 window.sendOrder = async () => {
-  const form = {
+  // 1. Capturar elementos del formulario
+  const formEls = {
     name: document.getElementById('order-name'),
     phone: document.getElementById('order-phone'),
     address: document.getElementById('order-address'),
     ref: document.getElementById('order-reference')
   };
 
-  // Validación básica
+  // Limpiar estados de error previos
+  Object.values(formEls).forEach(el => el.classList.remove('invalid'));
+
+  // 2. Validación de Formulario
   let isValid = true;
-  if (form.name.value.trim().length < 3) { form.name.classList.add('invalid'); isValid = false; }
-  if (!/^[56]\d{7}$/.test(form.phone.value.trim())) { form.phone.classList.add('invalid'); isValid = false; }
-  if (form.address.value.trim().length < 5) { form.address.classList.add('invalid'); isValid = false; }
+  
+  if (formEls.name.value.trim().length < 3) { 
+    formEls.name.classList.add('invalid'); 
+    isValid = false; 
+  }
+  // Valida que el teléfono tenga 8 dígitos y empiece por 5 o 6
+  if (!/^[56]\d{7}$/.test(formEls.phone.value.trim())) { 
+    formEls.phone.classList.add('invalid'); 
+    isValid = false; 
+  }
+  if (formEls.address.value.trim().length < 5) { 
+    formEls.address.classList.add('invalid'); 
+    isValid = false; 
+  }
 
-  if (!isValid) return showTopError("Revisa los datos del formulario");
+  if (!isValid) {
+    return showTopError("Por favor, completa los datos de entrega correctamente.");
+  }
 
-  // Flujo según moneda
-  const currency = AppState.currentCurrency;
-  if (currency === 'Z') return openPaymentModal('zelle');
-  if (currency === 'Tra') return openPaymentModal('tra');
-  if (currency === 'mlc') return openPaymentModal('mlc');
+  // 3. Detección de Moneda (Normalización)
+  // Convertimos a minúsculas y quitamos espacios para evitar errores de coincidencia
+  const currency = AppState.currentCurrency.toLowerCase().trim();
 
-  // Pago en Efectivo / Estándar
-  await processStandardOrder(form);
+  // 4. Lógica de derivación según el método de pago
+  // IMPORTANTE: Asegúrate que estos códigos coincidan con los de tu DB en Supabase
+  if (currency === 'z' || currency === 'zelle') {
+    return openPaymentModal('zelle');
+  }
+
+  if (currency === 'tra' || currency === 'transferencia' || currency === 'transf') {
+    return openPaymentModal('tra');
+  }
+
+  if (currency === 'mlc') {
+    return openPaymentModal('mlc');
+  }
+
+  // 5. Si no es un método de pago con comprobante, procesar como pedido estándar (Efectivo/CUP)
+  await processStandardOrder(formEls);
 };
 
 async function processStandardOrder(form) {
@@ -497,26 +529,45 @@ async function processStandardOrder(form) {
 // 8. MODALES DE PAGO (ZELLE, MLC, TRANSFERENCIA)
 // ==========================================
 
-function openPaymentModal(type) {
+window.openPaymentModal = (type) => {
+  // 1. Cerrar el carrito
   toggleCart(false);
+
+  // 2. Calcular totales
   const totalBase = AppState.cart.reduce((acc, i) => acc + (i.price * i.qty), 0);
   const totalObj = getCalculatedPrice(totalBase);
 
-  // Actualizar resumen en el modal correspondiente
-  document.getElementById(`${type}-summary-total`).textContent = totalObj.text;
-  document.getElementById(`${type}-summary-items`).textContent = AppState.cart.length;
+  // 3. Actualizar textos del modal (con protección de existencia)
+  const itemsEl = document.getElementById(`${type}-summary-items`);
+  const totalEl = document.getElementById(`${type}-summary-total`);
+  
+  if (itemsEl) itemsEl.textContent = AppState.cart.length;
+  if (totalEl) totalEl.textContent = totalObj.text;
 
-  // Resetear el input y mostrar
+  // 4. Resetear estado del modal
   resetModalState(type);
-  document.getElementById(`${type}-overlay`).classList.add('active');
+
+  // 5. Mostrar el modal (Añadir clase active)
+  const overlay = document.getElementById(`${type}-overlay`);
+  if (overlay) {
+    overlay.classList.add('active');
+  } else {
+    console.error(`No se encontró el modal con ID: ${type}-overlay`);
+  }
+  
   lucide.createIcons();
-}
+};
 
 function resetModalState(type) {
   AppState.files[type] = null;
-  document.getElementById(`${type}-preview-container`).style.display = 'none';
-  document.getElementById(`${type}-receipt-file`).value = '';
-  document.getElementById(`confirm-${type}-btn`).disabled = true;
+  
+  const previewCont = document.getElementById(`${type}-preview-container`);
+  const fileInput = document.getElementById(`${type}-receipt-file`);
+  const confirmBtn = document.getElementById(`confirm-${type}-btn`);
+
+  if (previewCont) previewCont.style.display = 'none';
+  if (fileInput) fileInput.value = '';
+  if (confirmBtn) confirmBtn.disabled = true;
 }
 
 window.handleReceiptInput = (type, event) => {

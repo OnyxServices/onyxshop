@@ -372,7 +372,6 @@ window.loadOrdersSummary = async () => {
             const method = (order.payment_method || "").toLowerCase();
             const myProfit = price * (percentage / 100);
 
-            // Lógica para detectar si requiere comprobante
             const isReceiptMethod = method.includes("zelle") || method.includes("mlc") || method.includes("tra") || method.includes("cup");
             const receiptUrl = order.receipt_url;
 
@@ -383,6 +382,7 @@ window.loadOrdersSummary = async () => {
             else if (method.includes("tra") || method.includes("cup")) stats.totalTra += price;
             else stats.totalUsd += price;
 
+            // Retornamos el HTML de la tarjeta
             return `
                 <div class="order-card">
                     <div class="order-header">
@@ -396,12 +396,15 @@ window.loadOrdersSummary = async () => {
                     </div>
                     
                     ${isReceiptMethod && receiptUrl ? `
-                        <div class="receipt-actions" style="margin-top:15px; display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
-                            <button class="btn btn-primary-glass" style="font-size:0.7rem; padding:8px;" onclick="window.viewReceipt('${receiptUrl}')">
+                        <div class="receipt-actions" style="margin-top:15px; display:grid; grid-template-columns: repeat(3, 1fr); gap:5px;">
+                            <button class="btn btn-primary-glass" style="font-size:0.65rem; padding:5px;" onclick="window.viewReceipt('${receiptUrl}')">
                                 👁️ Ver
                             </button>
-                            <button class="btn btn-edit" style="font-size:0.7rem; padding:8px;" onclick="window.downloadReceipt('${receiptUrl}', '${order.id}')">
+                            <button class="btn btn-edit" style="font-size:0.65rem; padding:5px;" onclick="window.downloadReceipt('${receiptUrl}', '${order.id}')">
                                 📥 Bajar
+                            </button>
+                            <button class="btn btn-add" style="font-size:0.65rem; padding:5px; background: #6366f1; color: white;" onclick="window.runOCR('${receiptUrl}', '${order.id}')">
+                                🔍 OCR
                             </button>
                         </div>
                     ` : ''}
@@ -643,5 +646,82 @@ window.downloadReceipt = async (url, orderId) => {
         window.URL.revokeObjectURL(blobUrl);
     } catch (e) {
         showToast("Error al descargar la imagen", "error");
+    }
+};
+
+window.runOCR = async (imageUrl, orderId) => {
+    // Verificamos si la librería está cargada
+    if (typeof Tesseract === 'undefined') {
+        showToast("Error: Librería OCR no cargada", "error");
+        return;
+    }
+
+    showToast("⏳ Analizando imagen...", "info");
+
+    try {
+        const worker = await Tesseract.createWorker('spa'); // Idioma español
+        const ret = await worker.recognize(imageUrl);
+        const text = ret.data.text;
+        await worker.terminate();
+
+        console.log("Texto extraído de orden " + orderId + ":", text);
+
+        // Intentar buscar un número de referencia (ejemplo 6 a 12 dígitos)
+        const refMatch = text.match(/\b\d{6,12}\b/);
+        const referencia = refMatch ? refMatch[0] : "No encontrada";
+
+        // Mostrar resultado
+        alert(`--- Análisis OCR ---\nID Orden: ${orderId.slice(-5)}\nReferencia detectada: ${referencia}\n\nTexto completo:\n${text.substring(0, 300)}...`);
+        
+    } catch (error) {
+        console.error("Error OCR:", error);
+        showToast("No se pudo leer la imagen", "error");
+    }
+};
+
+window.handleApplyMassPriceUpdate = async () => {
+    const type = document.getElementById('mass-adj-type').value;
+    const percentInput = document.getElementById('mass-adj-percent').value;
+    const percentage = parseFloat(percentInput);
+
+    if (!percentage || percentage <= 0) {
+        showToast("Ingresa un porcentaje válido", "error");
+        return;
+    }
+
+    // Si es disminución, el porcentaje debe ser negativo para la fórmula
+    const finalPercentage = type === 'decrease' ? (percentage * -1) : percentage;
+
+    // Confirmación de seguridad
+    const confirmText = type === 'increase' ? `aumentar un ${percentage}%` : `disminuir un ${percentage}%`;
+    const ok = await customConfirm(
+        "¿Confirmar cambio masivo?", 
+        `Se va a ${confirmText} el precio de TODOS los productos en esta categoría. Esta acción es irreversible.`
+    );
+
+    if (!ok) return;
+
+    try {
+        const btn = document.querySelector('#modal-mass-prices .btn-add');
+        const originalText = btn.innerText;
+        btn.innerText = "Procesando...";
+        btn.disabled = true;
+
+        await api.updatePricesByCategory(state.currentCategoryId, finalPercentage);
+
+        showToast("Precios actualizados correctamente", "success");
+        closeModal('modal-mass-prices');
+        
+        // Limpiar input y recargar datos
+        document.getElementById('mass-adj-percent').value = "";
+        await refreshData(); 
+        
+    } catch (e) {
+        console.error(e);
+        showToast("Error al actualizar precios", "error");
+    } finally {
+        const btn = document.querySelector('#modal-mass-prices .btn-add');
+        btn.innerText = "Aplicar Cambio Masivo";
+        btn.disabled = false;
     }
 };

@@ -290,3 +290,36 @@ export async function updateDeductionPercent(newValue) {
     
   if (error) throw error;
 }
+
+/**
+ * Actualiza los precios de todos los productos de una categoría por un porcentaje.
+ */
+export async function updatePricesByCategory(categoryId, percentage) {
+  // 1. Obtenemos todos los productos de esa categoría
+  const { data: products, error: fetchError } = await supabase
+    .from("products")
+    .select("id, price")
+    .eq("category_id", categoryId);
+
+  if (fetchError) throw fetchError;
+
+  // 2. Preparamos las promesas de actualización
+  const updates = products.map(p => {
+    const currentPrice = parseFloat(p.price);
+    const newPrice = currentPrice * (1 + (percentage / 100));
+    
+    return supabase
+      .from("products")
+      .update({ price: parseFloat(newPrice.toFixed(2)) })
+      .eq("id", p.id);
+  });
+
+  // 3. Ejecutamos todas las actualizaciones
+  const results = await Promise.all(updates);
+  
+  // Revisamos si alguna falló
+  const error = results.find(r => r.error);
+  if (error) throw error.error;
+
+  return true;
+}
