@@ -705,7 +705,7 @@ ${items}
 💰 *TOTAL A PAGAR:* *${totalText}*
 ──────────────────────
 
-🚀 _Por favor, confirme que ha recibido este pedido para comenzar a procesarlo._`;
+🚀 _Se le enviara um mensage cuando se confirme su pedido, Gracias por elegirnos._`;
 }
 
 // Globales para HTML
