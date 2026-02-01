@@ -828,13 +828,31 @@ document.addEventListener('click', () => {
 });
 
   // Carga de Datos
-  const splash = document.getElementById('splash-screen');
+   const splash = document.getElementById('splash-screen');
   try {
     await refreshData(true);
   } finally {
     if (splash) {
       splash.style.opacity = '0';
-      setTimeout(() => splash.style.display = 'none', 500);
+      setTimeout(() => {
+        splash.style.display = 'none';
+        
+        // --- AGREGA ESTO AQUÍ ---
+        const hint = document.getElementById('currency-hint');
+        if (hint) {
+          // Mostrar el aviso 1 segundo después de quitar el splash
+          setTimeout(() => {
+            hint.classList.add('show');
+            // Ocultarlo automáticamente después de 6 segundos
+            setTimeout(() => hint.classList.remove('show'), 6000);
+          }, 1000);
+          
+          // Ocultarlo si el usuario hace clic sobre el aviso
+          hint.onclick = () => hint.classList.remove('show');
+        }
+        // ------------------------
+        
+      }, 500);
     }
   }
 
